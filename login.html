@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhysioPlan — Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F0EDE8;--surface:#FFFFFF;--text:#1A1A1A;--muted:#8A8680;
+  --accent:#2E6B56;--accent-d:#1f5040;--accent-l:#EAF4EF;--accent-glow:rgba(46,107,86,.15);
+  --red:#D94444;--red-l:#FDF0F0;
+  --r:16px;--r-sm:10px;--r-lg:20px;
+  --sh-lg:0 8px 40px rgba(0,0,0,.12);
+  --transition:all .2s cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* ── LAYOUT SPLIT SCREEN ─────── */
+.login-wrap{display:flex;height:100vh}
+
+/* Panneau gauche — branding */
+.login-brand{width:50%;background:#1B1F1E;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;position:relative;overflow:hidden}
+.login-brand::before{content:'';position:absolute;top:-20%;right:-30%;width:600px;height:600px;border-radius:50%;background:rgba(46,107,86,.12);pointer-events:none}
+.login-brand::after{content:'';position:absolute;bottom:-15%;left:-20%;width:500px;height:500px;border-radius:50%;background:rgba(46,107,86,.08);pointer-events:none}
+.brand-logo{font-family:'Fraunces',serif;font-size:42px;font-weight:600;color:#fff;letter-spacing:-.5px;margin-bottom:8px;position:relative;z-index:1}
+.brand-logo em{color:#4ADE80;font-style:italic;font-weight:700}
+.brand-sub{font-size:12px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;font-weight:500;margin-bottom:48px;position:relative;z-index:1}
+.brand-tagline{font-family:'Fraunces',serif;font-size:22px;color:rgba(255,255,255,.5);text-align:center;line-height:1.6;font-weight:300;font-style:italic;max-width:360px;position:relative;z-index:1}
+.brand-features{display:flex;flex-direction:column;gap:16px;margin-top:48px;position:relative;z-index:1}
+.brand-feat{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.45);font-size:13px;font-weight:500}
+.brand-feat-icon{width:36px;height:36px;border-radius:10px;background:rgba(46,107,86,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-feat-icon svg{stroke:rgba(255,255,255,.6);width:18px;height:18px}
+
+/* Panneau droit — formulaire */
+.login-form-wrap{width:50%;display:flex;align-items:center;justify-content:center;padding:40px}
+.login-card{width:100%;max-width:400px}
+.login-card-logo{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:var(--text);letter-spacing:-.3px;margin-bottom:32px}
+.login-card-logo em{color:var(--accent);font-style:italic;font-weight:700}
+.login-title{font-family:'Fraunces',serif;font-size:26px;font-weight:600;letter-spacing:-.3px;margin-bottom:6px}
+.login-subtitle{font-size:14px;color:var(--muted);margin-bottom:32px}
+
+/* Formulaire */
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px}
+.form-input{width:100%;padding:13px 16px;border:1px solid rgba(0,0,0,.1);border-radius:var(--r-sm);font-size:14px;color:var(--text);background:#FAFAF8;outline:none;transition:var(--transition);font-family:inherit}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);background:#fff}
+.form-input::placeholder{color:#bbb}
+.form-input.err{border-color:var(--red);box-shadow:0 0 0 3px rgba(217,68,68,.1)}
+
+/* Password field */
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:48px}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;padding:4px;transition:var(--transition)}
+.pw-toggle:hover{color:var(--text)}
+
+/* Liens */
+.form-link{font-size:12.5px;color:var(--accent);text-decoration:none;font-weight:600;transition:var(--transition)}
+.form-link:hover{color:var(--accent-d);text-decoration:underline}
+.forgot-row{display:flex;justify-content:flex-end;margin-top:-12px;margin-bottom:20px}
+
+/* Boutons */
+.btn-login{width:100%;padding:14px;border:none;border-radius:var(--r-sm);font-size:15px;font-weight:600;cursor:pointer;transition:var(--transition);font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-d);transform:translateY(-1px);box-shadow:0 4px 16px rgba(46,107,86,.3)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-outline{background:transparent;color:var(--text);border:1px solid rgba(0,0,0,.12)}
+.btn-outline:hover{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.2)}
+
+/* Divider */
+.divider{display:flex;align-items:center;gap:16px;margin:24px 0;color:var(--muted);font-size:12px;font-weight:500}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(0,0,0,.08)}
+
+/* Messages d'erreur / succès */
+.msg{padding:12px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:500;margin-bottom:20px;display:none;align-items:center;gap:8px;line-height:1.5}
+.msg.err{display:flex;background:var(--red-l);color:var(--red);border:1px solid rgba(217,68,68,.12)}
+.msg.ok{display:flex;background:var(--accent-l);color:var(--accent);border:1px solid rgba(46,107,86,.12)}
+
+/* Trust footer */
+.trust-footer{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:32px;font-size:11.5px;color:var(--muted);font-weight:500}
+.trust-footer svg{flex-shrink:0}
+
+/* Spinner */
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-login.loading .spinner{display:block}
+.btn-login.loading .btn-text{display:none}
+
+/* Responsive */
+@media(max-width:900px){
+  .login-brand{display:none}
+  .login-form-wrap{width:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+
+  <!-- PANNEAU GAUCHE — BRANDING -->
+  <div class="login-brand">
+    <div class="brand-logo">Physio<em>Plan</em></div>
+    <div class="brand-sub">Management Suite</div>
+    <div class="brand-tagline">"Evidence-based clinical tracking for physiotherapists"</div>
+    <div class="brand-features">
+      <div class="brand-feat">
+        <div class="brand-feat-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <span>Gestion complète des patients</span>
+      </div>
+      <div class="brand-feat">
+        <div class="brand-feat-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+        <span>Planification de cycles et séances</span>
+      </div>
+      <div class="brand-feat">
+        <div class="brand-feat-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg></div>
+        <span>200+ exercices EBP par région</span>
+      </div>
+      <div class="brand-feat">
+        <div class="brand-feat-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <span>Suivi de progression et évaluations</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANNEAU DROIT — FORMULAIRE -->
+  <div class="login-form-wrap">
+    <div class="login-card">
+      <div class="login-card-logo">Physio<em>Plan</em></div>
+
+      <!-- VUE CONNEXION -->
+      <div id="view-login">
+        <div class="login-title">Bon retour !</div>
+        <div class="login-subtitle">Connectez-vous à votre espace patient.</div>
+        <div class="msg" id="login-msg"></div>
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="login-email">Adresse email</label>
+            <input class="form-input" id="login-email" type="email" placeholder="prenom@cabinet.fr" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="login-pw">Mot de passe</label>
+            <div class="pw-wrap">
+              <input class="form-input" id="login-pw" type="password" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('login-pw',this)" title="Afficher">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="forgot-row">
+            <a href="#" class="form-link" onclick="showView('forgot');return false">Mot de passe oublié ?</a>
+          </div>
+          <button class="btn-login btn-primary" type="submit" id="btn-login">
+            <span class="btn-text">Se connecter</span>
+            <div class="spinner"></div>
+          </button>
+        </form>
+        <div class="divider">ou</div>
+        <button class="btn-login btn-outline" onclick="showView('signup')">Créer un compte</button>
+      </div>
+
+      <!-- VUE INSCRIPTION -->
+      <div id="view-signup" style="display:none">
+        <div class="login-title">Créer un compte</div>
+        <div class="login-subtitle">Commencez à gérer vos patients en quelques secondes.</div>
+        <div class="msg" id="signup-msg"></div>
+        <form onsubmit="handleSignup(event)">
+          <div class="form-group">
+            <label for="signup-email">Adresse email</label>
+            <input class="form-input" id="signup-email" type="email" placeholder="prenom@cabinet.fr" required autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="signup-pw">Mot de passe</label>
+            <div class="pw-wrap">
+              <input class="form-input" id="signup-pw" type="password" placeholder="Minimum 6 caractères" required minlength="6" autocomplete="new-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('signup-pw',this)" title="Afficher">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="signup-pw2">Confirmer le mot de passe</label>
+            <div class="pw-wrap">
+              <input class="form-input" id="signup-pw2" type="password" placeholder="Retapez votre mot de passe" required minlength="6" autocomplete="new-password">
+              <button type="button" class="pw-toggle" onclick="togglePw('signup-pw2',this)" title="Afficher">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <button class="btn-login btn-primary" type="submit" id="btn-signup" style="margin-top:8px">
+            <span class="btn-text">Créer mon compte</span>
+            <div class="spinner"></div>
+          </button>
+        </form>
+        <div class="divider">ou</div>
+        <button class="btn-login btn-outline" onclick="showView('login')">J'ai déjà un compte</button>
+      </div>
+
+      <!-- VUE MOT DE PASSE OUBLIÉ -->
+      <div id="view-forgot" style="display:none">
+        <div class="login-title">Mot de passe oublié</div>
+        <div class="login-subtitle">Entrez votre email, vous recevrez un lien de réinitialisation.</div>
+        <div class="msg" id="forgot-msg"></div>
+        <form onsubmit="handleForgot(event)">
+          <div class="form-group">
+            <label for="forgot-email">Adresse email</label>
+            <input class="form-input" id="forgot-email" type="email" placeholder="prenom@cabinet.fr" required autocomplete="email">
+          </div>
+          <button class="btn-login btn-primary" type="submit" id="btn-forgot" style="margin-top:8px">
+            <span class="btn-text">Envoyer le lien</span>
+            <div class="spinner"></div>
+          </button>
+        </form>
+        <div style="margin-top:20px;text-align:center">
+          <a href="#" class="form-link" onclick="showView('login');return false">← Retour à la connexion</a>
+        </div>
+      </div>
+
+      <!-- TRUST FOOTER -->
+      <div class="trust-footer">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Données chiffrées et hébergées en Europe</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ════════════════════════════════
+// CONFIGURATION SUPABASE
+// ════════════════════════════════
+const SUPABASE_URL = 'https://lkocfahrzwegndihepla.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxrb2NmYWhyendlZ25kaWhlcGxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODg3NzcsImV4cCI6MjA4OTc2NDc3N30.2sZiSyxw1QVnz8Gv99F48uBZOJAn-BMt-9PtUOLFEPc';
+
+let sb = null;
+try {
+  // Supabase v2 UMD expose window.supabase avec createClient
+  const mod = window.supabase;
+  if (mod && mod.createClient) {
+    sb = mod.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log('Supabase initialisé avec succès');
+  } else {
+    throw new Error('window.supabase.createClient introuvable');
+  }
+} catch(e) {
+  console.error('Erreur init Supabase:', e);
+  document.body.insertAdjacentHTML('afterbegin',
+    '<div style="background:#D94444;color:#fff;padding:12px 20px;font-size:13px;font-family:Inter,sans-serif;text-align:center">' +
+    'Erreur : impossible de charger Supabase. Vérifiez votre connexion internet et rechargez la page.' +
+    '</div>');
+}
+
+// Nom du fichier principal PhysioPlan (à adapter si besoin)
+const APP_URL = 'index.html';
+
+// Erreurs globales
+window.onerror = function(msg, src, line) {
+  console.error('JS Error:', msg, 'at line', line);
+  return false;
+};
+
+// ════════════════════════════════
+// AU CHARGEMENT : vérifier si déjà connecté
+// ════════════════════════════════
+(async function checkSession() {
+  if (!sb) return;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      window.location.href = APP_URL;
+    }
+  } catch (e) {
+    console.log('Pas de session active');
+  }
+})();
+
+// ════════════════════════════════
+// NAVIGATION ENTRE LES VUES
+// ════════════════════════════════
+function showView(view) {
+  document.getElementById('view-login').style.display  = view === 'login'  ? 'block' : 'none';
+  document.getElementById('view-signup').style.display  = view === 'signup' ? 'block' : 'none';
+  document.getElementById('view-forgot').style.display  = view === 'forgot' ? 'block' : 'none';
+  // Reset messages
+  document.querySelectorAll('.msg').forEach(m => { m.className = 'msg'; m.textContent = ''; });
+}
+
+// ════════════════════════════════
+// AFFICHER/MASQUER MOT DE PASSE
+// ════════════════════════════════
+function togglePw(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.title = show ? 'Masquer' : 'Afficher';
+}
+
+// ════════════════════════════════
+// MESSAGES
+// ════════════════════════════════
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+// ════════════════════════════════
+// LOADING STATE
+// ════════════════════════════════
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (loading) { btn.classList.add('loading'); btn.disabled = true; }
+  else { btn.classList.remove('loading'); btn.disabled = false; }
+}
+
+// ════════════════════════════════
+// CONNEXION
+// ════════════════════════════════
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-pw').value;
+
+  if (!email || !pw) { showMsg('login-msg', 'Veuillez remplir tous les champs.', 'err'); return; }
+  if (!sb) { showMsg('login-msg', 'Erreur : Supabase non chargé. Rechargez la page.', 'err'); return; }
+
+  setLoading('btn-login', true);
+
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: email,
+      password: pw
+    });
+
+    if (error) {
+      let msg = 'Erreur de connexion.';
+      if (error.message.includes('Invalid login')) msg = 'Email ou mot de passe incorrect.';
+      else if (error.message.includes('Email not confirmed')) msg = 'Veuillez confirmer votre email avant de vous connecter.';
+      else msg = error.message;
+      showMsg('login-msg', msg, 'err');
+      setLoading('btn-login', false);
+      return;
+    }
+
+    // Succès → redirection
+    showMsg('login-msg', 'Connexion réussie ! Redirection...', 'ok');
+    setTimeout(() => { window.location.href = APP_URL; }, 800);
+
+  } catch (err) {
+    showMsg('login-msg', 'Erreur réseau. Vérifiez votre connexion internet.', 'err');
+    setLoading('btn-login', false);
+  }
+}
+
+// ════════════════════════════════
+// INSCRIPTION
+// ════════════════════════════════
+async function handleSignup(e) {
+  e.preventDefault();
+  const email = document.getElementById('signup-email').value.trim();
+  const pw    = document.getElementById('signup-pw').value;
+  const pw2   = document.getElementById('signup-pw2').value;
+
+  if (!email || !pw || !pw2) { showMsg('signup-msg', 'Veuillez remplir tous les champs.', 'err'); return; }
+  if (!sb) { showMsg('signup-msg', 'Erreur : Supabase non chargé. Rechargez la page.', 'err'); return; }
+  if (pw.length < 6) { showMsg('signup-msg', 'Le mot de passe doit contenir au moins 6 caractères.', 'err'); return; }
+  if (pw !== pw2) { showMsg('signup-msg', 'Les mots de passe ne correspondent pas.', 'err'); return; }
+
+  setLoading('btn-signup', true);
+
+  try {
+    const { data, error } = await sb.auth.signUp({
+      email: email,
+      password: pw
+    });
+
+    if (error) {
+      let msg = 'Erreur lors de la création du compte.';
+      if (error.message.includes('already registered')) msg = 'Cet email est déjà utilisé.';
+      else msg = error.message;
+      showMsg('signup-msg', msg, 'err');
+      setLoading('btn-signup', false);
+      return;
+    }
+
+    // Vérifier si confirmation email requise
+    if (data.user && !data.session) {
+      showMsg('signup-msg', 'Compte créé ! Vérifiez votre boîte mail pour confirmer votre adresse, puis connectez-vous.', 'ok');
+      setLoading('btn-signup', false);
+    } else if (data.session) {
+      // Connexion automatique (si confirmation email désactivée)
+      showMsg('signup-msg', 'Compte créé ! Redirection...', 'ok');
+      setTimeout(() => { window.location.href = APP_URL; }, 800);
+    }
+
+  } catch (err) {
+    showMsg('signup-msg', 'Erreur réseau. Vérifiez votre connexion internet.', 'err');
+    setLoading('btn-signup', false);
+  }
+}
+
+// ════════════════════════════════
+// MOT DE PASSE OUBLIÉ
+// ════════════════════════════════
+async function handleForgot(e) {
+  e.preventDefault();
+  const email = document.getElementById('forgot-email').value.trim();
+
+  if (!email) { showMsg('forgot-msg', 'Veuillez entrer votre adresse email.', 'err'); return; }
+  if (!sb) { showMsg('forgot-msg', 'Erreur : Supabase non chargé. Rechargez la page.', 'err'); return; }
+
+  setLoading('btn-forgot', true);
+
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email);
+
+    if (error) {
+      showMsg('forgot-msg', error.message, 'err');
+      setLoading('btn-forgot', false);
+      return;
+    }
+
+    showMsg('forgot-msg', 'Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.', 'ok');
+    setLoading('btn-forgot', false);
+
+  } catch (err) {
+    showMsg('forgot-msg', 'Erreur réseau. Vérifiez votre connexion internet.', 'err');
+    setLoading('btn-forgot', false);
+  }
+}
+
+// ════════════════════════════════
+// KEYBOARD
+// ════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    // Les forms gèrent déjà le submit
+  }
+});
+</script>
+</body>
+</html>

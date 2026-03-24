@@ -1,0 +1,3092 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhysioPlan</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   KINEPLAN v5.0 — MODERN DESIGN SYSTEM
+   Inspired by 2026 SaaS trends & Stitch render
+   ═══════════════════════════════════════════ */
+:root {
+  --bg:#F0EDE8;--surface:#FFFFFF;--surface2:#E8E5E0;--border:rgba(0,0,0,.08);
+  --text:#1A1A1A;--muted:#8A8680;
+  --accent:#2E6B56;--accent-l:#EAF4EF;--accent-d:#1f5040;--accent-glow:rgba(46,107,86,.15);
+  --orange:#D4723C;--orange-l:#FDF2EA;
+  --red:#D94444;--red-l:#FDF0F0;
+  --gold:#B8922B;--gold-l:#FDF8EC;
+  --r:16px;--r-sm:10px;--r-lg:20px;
+  --sh:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06);
+  --sh-lg:0 8px 40px rgba(0,0,0,.12);
+  --sh-card:0 1px 2px rgba(0,0,0,.03),0 4px 20px rgba(0,0,0,.05);
+  --sb-w:272px;
+  --transition:all .2s cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+#app{display:flex;height:100vh}
+button{cursor:pointer;font-family:inherit}
+input,select,textarea{font-family:inherit}
+
+/* ── SIDEBAR ─────────────────────── */
+#sb{width:var(--sb-w);background:#1B1F1E;display:flex;flex-direction:column;flex-shrink:0;border-right:1px solid rgba(255,255,255,.04)}
+#sb-top{padding:28px 20px 20px;flex-shrink:0}
+.logo{font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:#fff;letter-spacing:-.5px;display:flex;align-items:center;gap:0}
+.logo em{color:#4ADE80;font-style:italic;font-weight:700}
+.logo-ver{font-size:9px;color:rgba(255,255,255,.2);margin-left:6px;font-family:'Inter',sans-serif;font-weight:500;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1.2px;margin-top:4px;font-weight:500}
+#sb-search{padding:12px 14px 6px;flex-shrink:0}
+#sb-search input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);border-radius:var(--r-sm);color:#fff;padding:10px 12px 10px 36px;font-size:13px;outline:none;transition:var(--transition);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='M11 11l3 3'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
+#sb-search input::placeholder{color:rgba(255,255,255,.25)}
+#sb-search input:focus{border-color:var(--accent);background:rgba(255,255,255,.1)}
+#sb-list{flex:1;overflow-y:auto;padding:6px 10px;min-height:0;border-top:1px solid rgba(255,255,255,.04);margin-top:6px}
+#sb-list::-webkit-scrollbar{width:2px}
+#sb-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
+.pt-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r-sm);cursor:pointer;transition:var(--transition);margin-bottom:2px;user-select:none;border:1px solid transparent}
+.pt-item:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.04)}
+.pt-item.on{background:rgba(46,107,86,.3);border-color:rgba(74,222,128,.2);box-shadow:0 0 0 1px rgba(74,222,128,.08)}
+.pt-av{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.7);flex-shrink:0;font-family:'Inter',sans-serif;letter-spacing:.5px}
+.pt-item.on .pt-av{background:var(--accent);color:#fff}
+.pt-inf{overflow:hidden;flex:1;min-width:0}
+.pt-name{font-size:12.5px;font-weight:500;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pt-sub{font-size:10.5px;color:rgba(255,255,255,.35);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pt-dot{width:7px;height:7px;background:var(--orange);border-radius:50%;flex-shrink:0}
+#sb-bottom{padding:12px 14px 16px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;display:flex;flex-direction:column;gap:6px}
+.sb-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);padding:11px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:7px;transition:var(--transition);width:100%}
+.sb-btn:hover{background:var(--accent-d);transform:translateY(-1px);box-shadow:0 4px 12px rgba(46,107,86,.3)}
+.sb-btn-ghost{background:transparent;color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.08);border-radius:var(--r-sm);padding:9px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;transition:var(--transition);width:100%}
+.sb-btn-ghost:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.7)}
+
+/* ── MAIN ────────────────────────── */
+#main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+#empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;color:var(--muted)}
+#empty svg{opacity:.1}
+#empty h2{font-family:'Fraunces',serif;font-size:34px;opacity:.18;font-weight:300;letter-spacing:-.5px}
+#empty p{font-size:14px;opacity:.35}
+
+/* ── PATIENT HEADER ──────────────── */
+#pv{display:none;flex-direction:column;flex:1;overflow:hidden}
+#ph{background:#fff;border-bottom:1px solid var(--border);padding:22px 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:16px}
+#ph-l{display:flex;align-items:center;gap:16px;min-width:0}
+#ph-av{width:48px;height:48px;border-radius:12px;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;font-size:16px;font-weight:700;flex-shrink:0;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+#ph-name{font-family:'Fraunces',serif;font-size:28px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.4px}
+#ph-meta{font-size:12px;color:var(--muted);margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#ph-meta span{padding:4px 12px;background:var(--surface2);border-radius:20px;font-weight:500;font-size:11px;transition:var(--transition)}
+#ph-meta span:hover{background:var(--border)}
+.ph-actions{display:flex;gap:4px;flex-shrink:0}
+.ph-actions .btn{border-radius:50%;width:38px;height:38px;padding:0;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.ph-actions .btn:hover{transform:scale(1.08)}
+
+/* ── TABS ────────────────────────── */
+#tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;display:flex;gap:0;flex-shrink:0;overflow-x:auto}
+#tabs::-webkit-scrollbar{height:0}
+.tb{padding:14px 20px;border:none;background:none;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:var(--transition);display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.8px;border-radius:0}
+.tb:hover{color:var(--text);background:rgba(0,0,0,.02)}
+.tb.on{color:var(--accent);border-bottom-color:var(--accent);background:transparent}
+.tb-badge{background:var(--orange);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;min-width:18px;text-align:center;margin-left:2px}
+
+/* ── CONTENT ─────────────────────── */
+#content{flex:1;overflow-y:auto;padding:30px 36px}
+#content::-webkit-scrollbar{width:3px}
+#content::-webkit-scrollbar-thumb{background:rgba(0,0,0,.06);border-radius:4px}
+#content::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.12)}
+.tab-p{display:none}
+.tab-p.on{display:block}
+
+/* ── LAYOUT ──────────────────────── */
+.pg-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap}
+.pg-title h2{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-.2px}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);margin-bottom:18px;overflow:hidden;box-shadow:var(--sh-card);transition:var(--transition)}
+.card:hover{box-shadow:var(--sh)}
+.card-hd{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.015)}
+.card-hd-title{font-family:'Fraunces',serif;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;letter-spacing:-.1px}
+.card-bd{padding:24px}
+.brow{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+hr{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ── FORMS ────────────────────────── */
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg label{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+input[type="text"],input[type="number"],input[type="date"],input:not([type]),select,textarea{
+  border:1px solid var(--border);border-radius:var(--r-sm);padding:12px 14px;font-size:13.5px;color:var(--text);
+  background:#FAFAF8;outline:none;transition:var(--transition);width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);background:#fff}
+textarea{resize:vertical;min-height:76px;line-height:1.65}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g1{grid-template-columns:1fr}
+.s2{grid-column:span 2}.s3{grid-column:span 3}
+.field-err{font-size:12px;color:var(--red);margin-top:3px}
+
+/* ── BUTTONS ─────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:var(--transition);white-space:nowrap}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{background:var(--accent-d);transform:translateY(-1px);box-shadow:0 4px 12px rgba(46,107,86,.25)}
+.btn-s{background:var(--surface);color:var(--text);border:1px solid var(--border)}.btn-s:hover{background:var(--surface2)}
+.btn-o{background:var(--orange);color:#fff}.btn-o:hover{opacity:.9;transform:translateY(-1px)}
+.btn-d{background:var(--red-l);color:var(--red);border:1px solid rgba(217,68,68,.15)}.btn-d:hover{background:#fde0e0}
+.btn-g{background:var(--gold-l);color:var(--gold);border:1px solid rgba(184,146,43,.15)}.btn-g:hover{background:#f8ecc0}
+.btn-sm{padding:7px 13px;font-size:12px}.btn-xs{padding:4px 9px;font-size:11px}
+
+/* ── BADGES ──────────────────────── */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-ok{background:var(--accent-l);color:var(--accent)}
+.badge-mid{background:var(--gold-l);color:var(--gold)}
+.badge-bad{background:var(--red-l);color:var(--red)}
+.badge-gray{background:var(--surface2);color:var(--muted)}
+.cycle-sb{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.s-encours{background:var(--accent-l);color:var(--accent)}
+.s-termine{background:var(--surface2);color:var(--muted)}
+.s-avenir{background:var(--gold-l);color:var(--gold)}
+.tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.3px}
+.tag-s{background:var(--accent-l);color:var(--accent)}
+.tag-e{background:var(--orange-l);color:var(--orange)}
+
+/* ── PAIN / RPE ──────────────────── */
+.pain-scale{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+.pb{width:36px;height:36px;border:2px solid var(--border);border-radius:var(--r-sm);background:#FAFAF8;font-size:12px;font-weight:700;transition:var(--transition);display:flex;align-items:center;justify-content:center;padding:0}
+.pb:hover{border-color:var(--accent);transform:scale(1.05)}
+.pb.on{background:var(--accent);border-color:var(--accent);color:#fff;transform:scale(1.08);box-shadow:0 2px 8px var(--accent-glow)}
+.pb[data-v="7"].on,.pb[data-v="8"].on,.pb[data-v="9"].on,.pb[data-v="10"].on{background:var(--red);border-color:var(--red);box-shadow:0 2px 8px rgba(217,68,68,.25)}
+.rpe-bar{display:flex;gap:3px;flex-wrap:wrap}
+.rpe-btn{width:28px;height:28px;border:1.5px solid var(--border);border-radius:6px;background:#FAFAF8;font-size:10px;font-weight:700;transition:var(--transition);display:flex;align-items:center;justify-content:center;padding:0}
+.rpe-btn:hover{border-color:var(--accent);transform:scale(1.05)}
+.rpe-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.rpe-btn[data-r="8"].on,.rpe-btn[data-r="9"].on,.rpe-btn[data-r="10"].on{background:var(--red);border-color:var(--red)}
+
+/* ── PROGRESS ────────────────────── */
+.prog-wrap{margin-bottom:14px}
+.prog-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.prog-track{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+/* ── DASHBOARD — BENTO GRID ─────── */
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.dc{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 24px;box-shadow:var(--sh-card);transition:var(--transition);position:relative;overflow:hidden}
+.dc:hover{box-shadow:var(--sh);transform:translateY(-1px)}
+.dc-span2{grid-column:span 2}
+.dc-span3{grid-column:span 3}
+.dc-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.dc-val{font-family:'Fraunces',serif;font-size:42px;font-weight:600;color:var(--text);line-height:1;letter-spacing:-1px}
+.dc-val.g{color:var(--accent)}.dc-val.o{color:var(--orange)}
+.dc-sub{font-size:12px;color:var(--muted);margin-top:6px;font-weight:500}
+/* Carte sombre (style notes cliniques) */
+.dc-dark{background:#1B1F1E;color:#fff;border-color:transparent}
+.dc-dark .dc-lbl{color:rgba(255,255,255,.4)}
+.dc-dark .dc-val{color:#fff}
+.dc-dark .dc-sub{color:rgba(255,255,255,.5)}
+/* Cercle de progression */
+.dc-ring{width:100px;height:100px;margin:8px auto 6px}
+.dc-ring-text{font-family:'Fraunces',serif;font-size:28px;font-weight:700}
+
+/* ── CYCLES ──────────────────────── */
+.cycle-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:20px;overflow:hidden;box-shadow:var(--sh-card)}
+.cycle-hd{padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);gap:12px}
+.cc-title{font-family:'Fraunces',serif;font-size:17px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cc-meta{font-size:12px;color:var(--muted);display:flex;gap:14px;margin-top:4px;flex-wrap:wrap}
+.cycle-bd{padding:20px 24px}
+
+/* ── SEANCE ITEMS ────────────────── */
+.seance-item{display:flex;align-items:center;gap:12px;padding:11px 16px;background:#FAFAF8;border:1px solid var(--border);border-radius:var(--r);transition:var(--transition);cursor:pointer;margin-bottom:6px;user-select:none}
+.seance-item:hover{border-color:var(--accent);background:#fff;box-shadow:var(--sh);transform:translateY(-1px)}
+.seance-item.done{opacity:.65}
+.seance-item.eval-due{border-color:var(--orange);background:var(--orange-l)}
+.seance-item.today-s{border-color:var(--accent);background:var(--accent-l)}
+.sn{width:28px;height:28px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--muted);flex-shrink:0}
+.seance-item.done .sn{background:var(--accent);color:#fff}
+.seance-item.today-s .sn{background:var(--accent);color:#fff}
+.s-date{font-size:12px;color:var(--muted);min-width:88px;flex-shrink:0;font-weight:500}
+.s-label{flex:1;font-size:13px;font-weight:500;min-width:0}
+.s-note-prev{font-size:11.5px;color:var(--muted);font-style:italic;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:180px}
+.s-badges{display:flex;gap:5px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+
+/* ── CALENDAR ────────────────────── */
+.cal-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:10px;flex-wrap:wrap}
+#cal-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;letter-spacing:-.2px}
+.view-toggle{display:flex;background:var(--surface2);border-radius:var(--r-sm);padding:3px;gap:2px}
+.vt-btn{padding:7px 16px;border:none;background:none;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:var(--transition)}
+.vt-btn.on{background:#fff;color:var(--accent);box-shadow:var(--sh)}
+.cal-nav{display:flex;gap:4px}
+.cal-nav-btn{width:34px;height:34px;border:1px solid var(--border);background:#fff;border-radius:var(--r-sm);font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text);transition:var(--transition)}
+.cal-nav-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cal-dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.cal-dow-cell{text-align:center;font-size:10px;font-weight:700;color:var(--muted);padding:6px 0;text-transform:uppercase;letter-spacing:.6px}
+.cal-grid-m{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{min-height:88px;background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:8px;transition:var(--transition);box-shadow:var(--sh-card)}
+.cal-day:hover{border-color:var(--accent)}
+.cal-day.other-m{background:var(--bg);opacity:.35;box-shadow:none}
+.cal-day.today-c{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+.cal-day-num{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.cal-day.today-c .cal-day-num{color:var(--accent)}
+.cal-ev{border-radius:5px;padding:2px 6px;font-size:10px;font-weight:600;margin-bottom:2px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:var(--transition)}
+.cal-ev:hover{opacity:.75;transform:scale(1.02)}
+.wk-grid{display:grid;grid-template-columns:50px repeat(7,1fr);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-card)}
+.wk-hd{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 6px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.wk-hd.today-wh{color:var(--accent);background:var(--accent-l)}
+.wk-slot-lbl{background:var(--surface);border-right:1px solid var(--border);padding:6px 5px;text-align:right;font-size:10px;color:var(--muted);min-height:56px;display:flex;align-items:flex-start;justify-content:flex-end}
+.wk-cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:4px;min-height:56px}
+.wk-cell:last-child{border-right:none}
+.wk-ev{border-radius:6px;padding:4px 7px;font-size:11px;cursor:pointer;margin-bottom:2px;transition:var(--transition)}
+.wk-ev:hover{opacity:.8}
+
+/* ── EVALUATIONS ─────────────────── */
+.ev-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:0;margin-bottom:16px;overflow:hidden;box-shadow:var(--sh-card)}
+.ev-card-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.ev-card-title{font-weight:600;font-size:14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ev-fields{padding:4px 0}
+.ev-field{display:flex;gap:0;border-bottom:1px solid var(--border)}
+.ev-field:last-child{border-bottom:none}
+.ev-field-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:12px 16px;min-width:130px;flex-shrink:0;border-right:1px solid var(--border);display:flex;align-items:flex-start;padding-top:14px}
+.ev-field-val{font-size:13px;color:var(--text);line-height:1.6;padding:12px 16px;flex:1;white-space:pre-wrap;word-break:break-word}
+.ev-field-val.italic{color:var(--muted);font-style:italic}
+.ev-compare-bar{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ev-compare-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.ev-compare-btn{padding:6px 13px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text);transition:var(--transition)}
+.ev-compare-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ev-compare-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ev-compare-panel{background:#fff;border:2px solid var(--accent);border-radius:var(--r-lg);margin-bottom:18px;overflow:hidden;box-shadow:0 0 0 4px var(--accent-glow)}
+.ev-compare-panel-hd{background:var(--accent-l);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.ev-compare-panel-title{font-size:13px;font-weight:700;color:var(--accent)}
+.ev-compare-row{display:grid;grid-template-columns:120px 1fr 1fr;border-bottom:1px solid var(--border)}
+.ev-compare-row:last-child{border-bottom:none}
+.ev-compare-row-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:11px 14px;border-right:1px solid var(--border);display:flex;align-items:flex-start;background:var(--surface)}
+.ev-compare-cell{font-size:12.5px;padding:11px 14px;line-height:1.5;white-space:pre-wrap;word-break:break-word;border-right:1px solid var(--border)}
+.ev-compare-cell:last-child{border-right:none}
+.ev-compare-cell.better{background:#f0f8f4;color:var(--accent)}
+.ev-compare-cell.worse{background:var(--red-l);color:var(--red)}
+.ev-compare-cell.neutral{background:var(--surface)}
+.ev-compare-date{font-size:11px;font-weight:600;color:var(--muted);text-align:center;padding:7px 12px;background:var(--surface);border-bottom:1px solid var(--border)}
+.ev-metrics{display:none}.ev-m{display:none}
+.ev-m-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;font-weight:600}
+.ev-m-val{font-size:14px;font-weight:600}
+.ev-notes{font-size:12.5px;color:var(--muted);line-height:1.6;font-style:italic;padding-top:8px;border-top:1px solid var(--border)}
+.ev-type-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:5px}
+.et-init{background:var(--accent-l);color:var(--accent)}
+.et-inter{background:var(--gold-l);color:var(--gold)}
+.et-final{background:var(--orange-l);color:var(--orange)}
+.alert-bar{background:var(--orange-l);border:1px solid rgba(212,114,60,.15);border-radius:var(--r);padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:18px;font-size:13px;flex-wrap:wrap}
+.alert-bar strong{color:var(--orange)}
+
+/* ── SEANCE MODAL EXERCISES ──────── */
+.exo-table{width:100%;border-collapse:collapse}
+.exo-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:4px 8px 8px;text-align:left;border-bottom:2px solid var(--border)}
+.exo-table td{padding:4px 5px;vertical-align:top}
+.exo-table td input{font-size:12.5px;padding:7px 9px;min-width:0}
+.exo-row-del{width:28px;height:28px;background:var(--red-l);border:none;border-radius:7px;color:var(--red);display:flex;align-items:center;justify-content:center;font-size:13px;transition:var(--transition)}
+.exo-row-del:hover{background:#fde0e0;transform:scale(1.08)}
+.exo-rpe-select{width:64px;padding:8px 5px;font-size:13px;font-weight:600;border:1px solid var(--border);border-radius:8px;background:#FAFAF8;color:var(--text);cursor:pointer;text-align:center;transition:var(--transition)}
+.exo-rpe-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);background:#fff;outline:none}
+.exo-rpe-select.rpe-hi{border-color:var(--red);color:var(--red);background:var(--red-l)}
+.exo-rpe-select.rpe-mid{border-color:var(--orange);color:var(--orange);background:var(--orange-l)}
+
+/* ── COLOR PICKER ────────────────── */
+.color-picker{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+.cp-sw{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:var(--transition)}
+.cp-sw.on{border-color:var(--text);transform:scale(1.15)}
+
+/* ── EXAM SUBSECTIONS ────────────── */
+.exam-subsection{padding:18px 0;border-bottom:1px solid var(--border);margin-bottom:4px}
+.exam-subsection:last-child{border-bottom:none}
+.exam-subsection-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+
+/* ── BIBLIOTHÈQUE ────────────────── */
+.lib-toolbar{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.lib-search-wrap{flex:1;min-width:140px}
+.lib-search-wrap input{width:100%}
+.lib-region-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.lib-rtab{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);transition:var(--transition);white-space:nowrap}
+.lib-rtab:hover{border-color:var(--accent);color:var(--accent)}
+.lib-rtab.on{color:#fff;border-color:transparent}
+.lib-type-filters{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.lib-tfilt{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--muted);transition:var(--transition)}
+.lib-tfilt:hover{border-color:var(--accent);color:var(--accent)}
+.lib-tfilt.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.lib-exo-list{max-height:340px;overflow-y:auto}
+.lib-exo-list::-webkit-scrollbar{width:4px}
+.lib-exo-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.08);border-radius:2px}
+.lib-exo-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--r-sm);margin-bottom:4px;border:1px solid var(--border);background:#fff;transition:var(--transition);cursor:pointer}
+.lib-exo-row:hover{border-color:var(--accent);background:var(--accent-l);transform:translateY(-1px)}
+.lib-exo-color{width:4px;height:32px;border-radius:2px;flex-shrink:0}
+.lib-exo-info{flex:1;min-width:0}
+.lib-exo-fr{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-exo-en{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.lib-exo-badges{display:flex;gap:3px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.lib-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.lib-add-btn{padding:5px 11px;border-radius:7px;font-size:11px;font-weight:600;border:1.5px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:var(--transition);flex-shrink:0}
+.lib-add-btn:hover{background:var(--accent);color:#fff}
+.lib-count{font-size:11.5px;color:var(--muted);margin-left:auto;padding:2px 0}
+
+/* ── BLOCS D'EXERCICES ───────────── */
+.bloc-wrap{margin-bottom:20px;border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--border);box-shadow:var(--sh-card);transition:var(--transition)}
+.bloc-wrap:hover{box-shadow:var(--sh)}
+.bloc-header{display:flex;flex-direction:column;gap:0;padding:0;border-bottom:1px solid var(--border)}
+.bloc-header-top{display:flex;align-items:center;gap:10px;padding:14px 18px}
+.bloc-header-bottom{display:flex;align-items:center;gap:5px;padding:6px 18px 12px;flex-wrap:nowrap;overflow-x:auto}
+.bloc-color-strip{width:5px;height:32px;border-radius:3px;flex-shrink:0}
+.bloc-name-input{flex:1;background:transparent;border:none;font-size:16px;font-weight:600;color:var(--text);outline:none;padding:2px 0;min-width:80px;font-family:'Inter',sans-serif;letter-spacing:-.2px}
+.bloc-name-input::placeholder{color:var(--muted);font-weight:400}
+.bloc-name-input:focus{color:var(--accent)}
+.bloc-actions{display:flex;gap:6px;margin-left:auto;flex-shrink:0;align-items:center}
+.bloc-format-wrap{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.bloc-fmt-btn{padding:5px 10px;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid transparent;background:rgba(0,0,0,.05);color:rgba(0,0,0,.4);transition:var(--transition);letter-spacing:.3px;white-space:nowrap;line-height:1.4}
+.bloc-fmt-btn:hover{background:rgba(0,0,0,.1)}
+.bloc-fmt-btn.on{background:var(--text);color:#fff;border-color:var(--text)}
+.bloc-fmt-btn.on.fmt-ss{background:#3A6FA8;border-color:#3A6FA8}
+.bloc-fmt-btn.on.fmt-circuit{background:#2E6B56;border-color:#2E6B56}
+.bloc-fmt-btn.on.fmt-amrap{background:#D4723C;border-color:#D4723C}
+.bloc-fmt-btn.on.fmt-emom{background:#8A3A8A;border-color:#8A3A8A}
+.bloc-tours-input{width:46px;font-size:12px;padding:4px 6px;border:1.5px solid var(--border);border-radius:7px;background:#fff;text-align:center;color:var(--text);outline:none;font-weight:600}
+.bloc-tours-input:focus{border-color:var(--accent)}
+.bloc-tours-label{font-size:11px;font-weight:600;color:rgba(0,0,0,.35);white-space:nowrap}
+.fmt-badge{font-size:9px;font-weight:700;padding:3px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.fmt-badge-ss{background:#EBF3FB;color:#3A6FA8}
+.fmt-badge-circuit{background:#EAF4EF;color:#2E6B56}
+.fmt-badge-amrap{background:#FDF2EA;color:#D4723C}
+.fmt-badge-emom{background:#F3EEF8;color:#8A3A8A}
+.bloc-del-btn{width:26px;height:26px;background:var(--red-l);border:none;border-radius:7px;color:var(--red);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.bloc-del-btn:hover{background:#fde0e0;transform:scale(1.08)}
+.bloc-add-exo-btn{padding:5px 12px;background:transparent;border:1px solid var(--border);border-radius:7px;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer;transition:var(--transition);white-space:nowrap}
+.bloc-add-exo-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+.order-btn{width:24px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:var(--transition);padding:0;flex-shrink:0}
+.order-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.order-btn:disabled{opacity:.2;cursor:default}
+.drag-handle{width:20px;cursor:grab;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;user-select:none;opacity:.3;transition:var(--transition)}
+.drag-handle:hover{opacity:.7;color:var(--accent)}
+.drag-handle:active{cursor:grabbing}
+.bloc-wrap.dragging{opacity:.4;border-style:dashed}
+.bloc-wrap.drag-over{border-color:var(--accent);border-width:2px;background:var(--accent-l)}
+.exo-tr.dragging{opacity:.4}
+.exo-tr.drag-over td{background:var(--accent-l)}
+.col-handle{width:24px;padding:2px 3px!important;vertical-align:middle}
+.bloc-table-wrap{padding:14px 20px 18px}
+.bloc-table{width:100%;border-collapse:collapse}
+.bloc-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;padding:6px 8px 10px;text-align:left;border-bottom:1.5px solid var(--border)}
+.bloc-table td{padding:5px 5px;vertical-align:middle}
+.bloc-table td input{font-size:13px;padding:8px 10px;min-width:0;border-radius:8px}
+.bloc-empty{font-size:13px;color:var(--muted);font-style:italic;padding:14px 0 8px;text-align:center}
+.bloc-color-picker{display:flex;gap:6px}
+.bcp-sw{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:var(--transition);flex-shrink:0}
+.bcp-sw:hover{transform:scale(1.12)}
+.bcp-sw.on{border-color:var(--text);transform:scale(1.2)}
+.add-bloc-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+
+/* ── SETTINGS ────────────────────── */
+.settings-section{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 24px;margin-bottom:18px;box-shadow:var(--sh-card)}
+.settings-section h3{font-family:'Fraunces',serif;font-size:16px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);gap:12px;flex-wrap:wrap}
+.settings-row:last-child{border-bottom:none}
+.settings-row-info{flex:1;min-width:0}
+.settings-row-info strong{font-size:13.5px;display:block;margin-bottom:2px}
+.settings-row-info span{font-size:12px;color:var(--muted)}
+.storage-bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:6px;max-width:260px}
+.storage-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+.storage-fill.warn{background:var(--orange)}
+.storage-fill.crit{background:var(--red)}
+
+/* ── MODAL ────────────────────────── */
+#mo{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+#mo.open{display:flex}
+.modal{background:#fff;border-radius:var(--r-lg);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.2)}
+.modal-xl{max-width:840px}.modal-lg{max-width:680px}
+.mo-hd{padding:22px 28px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:2;border-radius:var(--r-lg) var(--r-lg) 0 0}
+.mo-title{font-family:'Fraunces',serif;font-size:21px;font-weight:600;letter-spacing:-.3px}
+.mo-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.mo-close{width:34px;height:34px;background:var(--surface2);border:none;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:var(--transition);flex-shrink:0;margin-top:2px}
+.mo-close:hover{background:var(--border);color:var(--text);transform:rotate(90deg)}
+.mo-bd{padding:24px 28px}
+.mo-ft{padding:16px 28px 24px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--border);flex-wrap:wrap}
+
+/* ── CONFIRM DIALOG ──────────────── */
+#confirm-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+#confirm-overlay.open{display:flex}
+.confirm-box{background:#fff;border-radius:var(--r-lg);padding:26px 28px;max-width:400px;width:100%;box-shadow:var(--sh-lg)}
+.confirm-title{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:10px}
+.confirm-msg{font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:22px}
+.confirm-actions{display:flex;gap:10px;justify-content:flex-end}
+
+/* ── TOAST ────────────────────────── */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:12px 18px;border-radius:var(--r);font-size:13px;font-weight:500;z-index:3000;opacity:0;transition:opacity .25s;pointer-events:none;max-width:320px;box-shadow:var(--sh-lg)}
+#toast.err{background:var(--red)}
+#toast.ok{background:var(--accent)}
+
+/* ── EMPTY STATE ─────────────────── */
+.empty-list{text-align:center;padding:36px 16px;color:var(--muted);font-size:13.5px}
+.empty-list svg{opacity:.2;margin-bottom:10px;display:block;margin-left:auto;margin-right:auto}
+
+/* ── PRINT ────────────────────────── */
+@media print{
+  #sb,#ph .ph-actions,#tabs,button,#toast,#mo,#confirm-overlay{display:none!important}
+  body,#app,#main,#pv,#content{overflow:visible!important;height:auto!important}
+  .tab-p{display:block!important}
+  .cycle-card,.ev-card{page-break-inside:avoid}
+  #app{display:block}
+  #content{padding:0}
+}
+</style>
+</head>
+<body>
+<div id="js-err" style="display:none;position:fixed;top:0;left:0;right:0;background:#D94444;color:#fff;padding:10px 18px;font-size:13px;z-index:9999;font-family:Inter,Arial,sans-serif;border-radius:0 0 12px 12px">
+  <span id="js-err-msg"></span>
+  <button onclick="localStorage.removeItem('kineplan_v31');location.reload()" style="background:#fff;color:#D94444;border:none;border-radius:6px;padding:4px 12px;margin-left:12px;cursor:pointer;font-weight:700;font-size:12px">Réinitialiser</button>
+</div>
+<div id="app">
+
+<!-- SIDEBAR -->
+<nav id="sb">
+  <div id="sb-top">
+    <div class="logo">
+      Physio<em>Plan</em>
+      <span class="logo-ver">v5.0</span>
+    </div>
+    <div class="logo-sub">Management Suite</div>
+    <div id="autosave-indicator" style="font-size:10px;margin-top:8px;color:rgba(255,255,255,.25);cursor:default" title="Statut sauvegarde OneDrive">⚪ OneDrive hors ligne</div>
+  </div>
+  <div id="sb-search">
+    <input id="sb-inp" placeholder="Rechercher…" oninput="filterPts(this.value)" autocomplete="off">
+  </div>
+  <div id="sb-list"></div>
+  <div id="sb-bottom">
+    <button class="sb-btn" onclick="openAddPatient()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/><path d="M12 11v6M9 14h6" stroke-width="2"/></svg>
+      + Nouveau patient
+    </button>
+    <button class="sb-btn-ghost" onclick="openSettings()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+      Paramètres
+    </button>
+    <button class="sb-btn-ghost" onclick="handleLogout()" style="color:rgba(255,255,255,.35);border-color:rgba(255,255,255,.05)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Déconnexion
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+  <div id="empty">
+    <svg width="64" height="64" fill="none" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="1"/><path d="M24 32h16M32 24v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <h2>PhysioPlan</h2>
+    <p>Sélectionnez ou créez un patient pour commencer.</p>
+  </div>
+
+  <div id="pv">
+    <div id="ph">
+      <div id="ph-l">
+        <div id="ph-av"></div>
+        <div style="min-width:0">
+          <div id="ph-name"></div>
+          <div id="ph-meta"></div>
+        </div>
+      </div>
+      <div class="ph-actions">
+        <button class="btn btn-s btn-sm" onclick="printPatient()" title="Exporter PDF" style="padding:7px 10px">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+        </button>
+        <button class="btn btn-s btn-sm" onclick="openEditPt()" title="Modifier" style="padding:7px 10px">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        </button>
+        <button class="btn btn-d btn-sm" onclick="confirmDeletePt()" title="Supprimer" style="padding:7px 10px">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="tabs">
+      <button class="tb on" onclick="swTab('dashboard')" id="t-dashboard">Tableau de bord</button>
+      <button class="tb" onclick="swTab('bilan')" id="t-bilan">Bilan</button>
+      <button class="tb" onclick="swTab('cycles')" id="t-cycles">Cycles</button>
+      <button class="tb" onclick="swTab('calendar')" id="t-calendar">Calendrier</button>
+      <button class="tb" onclick="swTab('evals')" id="t-evals">
+        Évaluations
+        <span class="tb-badge" id="ev-badge" style="display:none"></span>
+      </button>
+    </div>
+
+    <div id="content">
+      <!-- BILAN -->
+      <div id="p-bilan" class="tab-p">
+        <div class="pg-title"><h2>Bilan initial</h2><button class="btn btn-p btn-sm" onclick="saveBilan()">💾 Enregistrer</button></div>
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-title">Informations générales</div></div>
+          <div class="card-bd">
+            <div class="grid g2">
+              <div class="fg"><label>Diagnostic / Pathologie</label><input id="b-diag" placeholder="ex: LCA, tendinopathie rotulienne…" autocomplete="off"></div>
+              <div class="fg"><label>Date début prise en charge</label><input type="date" id="b-deb"></div>
+              <div class="fg s2"><label>Antécédents médicaux</label><textarea id="b-ant" placeholder="Antécédents chirurgicaux, médicaux, traitements…"></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-title">Examen physique</div></div>
+          <div class="card-bd">
+
+            <div class="exam-subsection">
+              <div class="exam-subsection-title">🔴 Douleur</div>
+              <div class="grid g3">
+                <div class="fg s3">
+                  <label>Intensité EVA (0 = aucune → 10 = maximale)</label>
+                  <div class="pain-scale" id="b-ps"></div>
+                  <input type="hidden" id="b-eva">
+                </div>
+                <div class="fg"><label>Localisation</label><input id="b-dloc" placeholder="ex: Face antérieure genou, L4-L5…" autocomplete="off"></div>
+                <div class="fg"><label>Caractère de la douleur</label><input id="b-dcar" placeholder="ex: Mécanique, inflammatoire, brûlure…" autocomplete="off"></div>
+                <div class="fg"><label>Amplitude douloureuse</label><input id="b-damp" placeholder="ex: À partir de 90° de flexion…" autocomplete="off"></div>
+                <div class="fg"><label>Douleur nocturne</label><input id="b-dnoc" placeholder="ex: Oui / Non, réveil nocturne…" autocomplete="off"></div>
+                <div class="fg"><label>Autres éléments douleur</label><input id="b-daut" placeholder="ex: Irradiations, facteurs aggravants…" autocomplete="off"></div>
+              </div>
+            </div>
+
+            <div class="exam-subsection">
+              <div class="exam-subsection-title">👁 Inspection / Observation</div>
+              <div class="grid g1">
+                <div class="fg"><label>Observations</label><textarea id="b-insp" placeholder="ex: Amyotrophie quadriceps, œdème, attitude antalgique, appui unipodal…"></textarea></div>
+              </div>
+            </div>
+
+            <div class="exam-subsection">
+              <div class="exam-subsection-title">📐 Mobilité</div>
+              <div class="grid g1">
+                <div class="fg"><label>Amplitudes articulaires</label><textarea id="b-mob" placeholder="ex: Flexion genou D : 110°, G : 130° — Extension D : -5°, G : 0° — Rotation…"></textarea></div>
+              </div>
+            </div>
+
+            <div class="exam-subsection">
+              <div class="exam-subsection-title">💪 Force musculaire</div>
+              <div class="grid g1">
+                <div class="fg"><label>Testing / Évaluation</label><textarea id="b-for" placeholder="ex: Quadriceps D : 3/5, G : 5/5 — Ischio-jambiers D : 4/5 — ITO flexion : 62 sec…"></textarea></div>
+              </div>
+            </div>
+
+            <div class="exam-subsection">
+              <div class="exam-subsection-title">🧠 Tests neurologiques</div>
+              <div class="grid g1">
+                <div class="fg"><label>Sensibilité / Réflexes / Signe neurologique</label><textarea id="b-neuro" placeholder="ex: ROT rotulien N, sensibilité N, signe de Lasègue négatif…"></textarea></div>
+              </div>
+            </div>
+
+            <div class="exam-subsection">
+              <div class="exam-subsection-title">🏃 Fonctionnel</div>
+              <div class="grid g1">
+                <div class="fg"><label>Évaluation fonctionnelle</label><textarea id="b-fonc" placeholder="ex: Montée escaliers : boiterie, appui monopodal D : 8 sec, marche 500m…"></textarea></div>
+              </div>
+            </div>
+
+            <div class="exam-subsection" style="border-bottom:none;padding-bottom:0;margin-bottom:0">
+              <div class="exam-subsection-title">🔬 Tests spécifiques / Orthopédiques</div>
+              <div class="grid g1">
+                <div class="fg"><label>Tests orthopédiques et spécifiques</label><textarea id="b-aut" placeholder="ex: Lachman +, tiroir antérieur +, McMurray -, Neer -, Single hop test : 65%…"></textarea></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><div class="card-hd-title">Objectifs &amp; Notes</div></div>
+          <div class="card-bd">
+            <div class="grid g1">
+              <div class="fg"><label>Objectifs court terme</label><textarea id="b-oc" placeholder="Marche sans douleur, escaliers…"></textarea></div>
+              <div class="fg"><label>Objectifs long terme</label><textarea id="b-ol" placeholder="Reprise du sport, retour au travail…"></textarea></div>
+              <div class="fg"><label>Notes libres</label><textarea id="b-nt" placeholder="Observations, contexte de vie, motivation…"></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="brow"><button class="btn btn-p" onclick="saveBilan()">💾 Enregistrer le bilan</button></div>
+      </div>
+
+      <!-- CYCLES -->
+      <div id="p-cycles" class="tab-p">
+        <div class="pg-title">
+          <h2>Cycles de travail</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-s btn-sm" onclick="openCopyCycle()">📋 Copier un cycle</button>
+            <button class="btn btn-p btn-sm" onclick="openAddCycle()">+ Nouveau cycle</button>
+          </div>
+        </div>
+        <div id="cycles-list"></div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div id="p-calendar" class="tab-p">
+        <div class="cal-toolbar">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div id="cal-title"></div>
+            <div class="view-toggle">
+              <button class="vt-btn on" id="vt-month" onclick="setCalView('month')">Mois</button>
+              <button class="vt-btn" id="vt-week" onclick="setCalView('week')">Semaine</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:7px;align-items:center">
+            <div class="cal-nav">
+              <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+              <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+            </div>
+            <button class="btn btn-s btn-sm" onclick="calToday()">Aujourd'hui</button>
+          </div>
+        </div>
+        <div id="cal-body"></div>
+      </div>
+
+      <!-- EVALUATIONS -->
+      <div id="p-evals" class="tab-p">
+        <div class="pg-title"><h2>Évaluations</h2><button class="btn btn-o btn-sm" onclick="openAddEval()">+ Nouvelle évaluation</button></div>
+        <div id="eval-alerts"></div>
+        <div id="eval-compare-panel" style="display:none"></div>
+        <div id="evals-list"></div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div id="p-dashboard" class="tab-p on">
+        <div class="pg-title"><h2>Tableau de bord</h2></div>
+        <div id="dash-content"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /pv -->
+</main>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- CONFIRM DIALOG -->
+<div id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title"></div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-s" onclick="closeConfirm(false)">Annuler</button>
+      <button class="btn btn-d" id="confirm-ok" onclick="closeConfirm(true)">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div id="mo" onclick="closeMoOverlay(event)">
+
+  <!-- Patient -->
+  <div class="modal" id="mo-pt" style="display:none">
+    <div class="mo-hd"><div><div class="mo-title" id="mo-pt-title">Nouveau patient</div></div><button class="mo-close" onclick="closeMo()">✕</button></div>
+    <div class="mo-bd">
+      <div class="grid g2">
+        <div class="fg"><label>Prénom *</label><input id="pt-prenom" autocomplete="off" placeholder="Prénom"></div>
+        <div class="fg"><label>Nom *</label><input id="pt-nom" autocomplete="off" placeholder="Nom"></div>
+        <div class="fg"><label>Date de naissance</label><input type="date" id="pt-dob"></div>
+        <div class="fg"><label>Pathologie principale</label><input id="pt-patho" autocomplete="off" placeholder="ex: LCA, épaule…"></div>
+      </div>
+      <div id="pt-error" class="field-err" style="margin-top:8px"></div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-s" onclick="closeMo()">Annuler</button>
+      <button class="btn btn-p" id="mo-pt-save" onclick="savePt()">Créer le patient</button>
+    </div>
+  </div>
+
+  <!-- Cycle -->
+  <div class="modal modal-lg" id="mo-cycle" style="display:none">
+    <div class="mo-hd"><div><div class="mo-title" id="mo-cy-title">Nouveau cycle</div></div><button class="mo-close" onclick="closeMo()">✕</button></div>
+    <div class="mo-bd">
+      <div class="grid g2">
+        <div class="fg s2"><label>Intitulé *</label><input id="cy-nom" placeholder="ex: Cycle 1 – Force initiale" autocomplete="off"></div>
+        <div class="fg"><label>Couleur</label><div class="color-picker" id="cy-colors"></div><input type="hidden" id="cy-color" value="#2E6B56"></div>
+        <div class="fg"><label>Date de début *</label><input type="date" id="cy-deb"></div>
+        <div class="fg"><label>Durée (semaines) *</label><input type="number" id="cy-dur" min="1" max="52" placeholder="4"></div>
+        <div class="fg"><label>Séances / semaine *</label><input type="number" id="cy-freq" min="1" max="7" placeholder="2"></div>
+        <div class="fg"><label>Éval. intermédiaire (toutes les N séances)</label><input type="number" id="cy-evf" min="1" max="99" placeholder="Optionnel, ex: 6"></div>
+        <div class="fg s2"><label>Objectifs du cycle</label><textarea id="cy-obj" placeholder="Renforcement, proprioception…"></textarea></div>
+        <div class="fg s2"><label>Contenu / Exercices prévus</label><textarea id="cy-ctn" placeholder="Squat, presse, vélo, gainage…"></textarea></div>
+      </div>
+      <div id="cy-error" class="field-err" style="margin-top:8px"></div>
+      <div id="cy-preview" style="margin-top:12px;font-size:12.5px;color:var(--muted);background:var(--bg);padding:10px 13px;border-radius:8px;display:none"></div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-s" onclick="closeMo()">Annuler</button>
+      <button class="btn btn-p" id="cy-save-btn" onclick="saveCycle()">Créer le cycle</button>
+    </div>
+  </div>
+
+  <!-- Copy Cycle -->
+  <div class="modal" id="mo-copy" style="display:none">
+    <div class="mo-hd"><div class="mo-title">Copier un cycle</div><button class="mo-close" onclick="closeMo()">✕</button></div>
+    <div class="mo-bd">
+      <div class="fg" style="margin-bottom:14px"><label>Cycle source</label><select id="copy-src" onchange="updateCopyInfo()"></select></div>
+      <div id="copy-info" style="font-size:13px;color:var(--muted);margin-bottom:14px;padding:10px 13px;background:var(--bg);border-radius:8px;min-height:36px"></div>
+      <div class="grid g2">
+        <div class="fg"><label>Nouveau nom (optionnel)</label><input id="copy-nom" placeholder="Laissez vide = nom + (copie)" autocomplete="off"></div>
+        <div class="fg"><label>Nouvelle date de début</label><input type="date" id="copy-deb"></div>
+      </div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-s" onclick="closeMo()">Annuler</button>
+      <button class="btn btn-p" onclick="doCopyCycle()">Copier</button>
+    </div>
+  </div>
+
+  <!-- Séance -->
+  <div class="modal modal-xl" id="mo-seance" style="display:none">
+    <div class="mo-hd">
+      <div><div class="mo-title" id="mo-s-title">Séance</div><div class="mo-sub" id="mo-s-sub"></div></div>
+      <div style="display:flex;align-items:center;gap:8px"><span id="mo-s-badge"></span><button class="mo-close" onclick="closeMo()">✕</button></div>
+    </div>
+    <div class="mo-bd">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:9px;flex-wrap:wrap">
+        <div style="font-size:12.5px;color:var(--muted);flex-shrink:0">📅 Date de la séance</div>
+        <input type="date" id="s-date" style="width:160px;flex-shrink:0;font-size:13.5px;padding:7px 10px">
+        <div style="font-size:12px;color:var(--muted);font-style:italic">Modifiez si la date ne correspond pas à votre planning réel.</div>
+      </div>
+      <div class="fg" style="margin-bottom:16px">
+        <label>Notes de séance (ressenti patient, observations cliniques)</label>
+        <textarea id="s-notes" placeholder="Observations, douleur en séance…" style="min-height:58px"></textarea>
+      </div>
+      <div class="fg" style="margin-bottom:16px">
+        <label>RPE global de la séance (0 = très facile → 10 = effort maximal)</label>
+        <div class="rpe-bar" id="s-rpe-bar"></div>
+        <input type="hidden" id="s-rpe">
+      </div>
+      <hr>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap">
+        <div style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Blocs d'exercices</div>
+        <button class="btn btn-p btn-sm" onclick="addBloc()">+ Nouveau bloc</button>
+      </div>
+      <div id="blocs-container"></div>
+      <div id="blocs-empty" class="empty-list" style="display:none">Aucun bloc. Cliquez sur &quot;+ Nouveau bloc&quot; pour commencer.</div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-s" onclick="closeMo()">Fermer</button>
+      <button class="btn btn-g btn-sm" onclick="openReplicatePicker()" id="btn-replicate" style="margin-right:auto">📋 Répliquer une séance…</button>
+      <button class="btn btn-p" onclick="saveSeance()">💾 Enregistrer la séance</button>
+    </div>
+  </div>
+
+  <!-- Bibliothèque -->
+  <div class="modal modal-xl" id="mo-lib" style="display:none">
+    <div class="mo-hd">
+      <div><div class="mo-title">📚 Bibliothèque d'exercices</div><div class="mo-sub" id="lib-count-sub"></div></div>
+      <button class="mo-close" onclick="closeLibBackToSeance()">✕</button>
+    </div>
+    <div class="mo-bd">
+      <div class="lib-toolbar">
+        <div class="lib-search-wrap"><input id="lib-search" placeholder="Rechercher un exercice…" oninput="renderLib()" autocomplete="off"></div>
+        <select id="lib-type-filter" onchange="renderLib()" style="width:130px;font-size:12.5px;padding:7px 10px">
+          <option value="">Tous les types</option>
+          <option value="Poly">Polyarticulaire</option>
+          <option value="Mono">Monoarticulaire</option>
+          <option value="Iso">Isométrique</option>
+          <option value="Plio">Pliométrique</option>
+          <option value="Mob">Mobilité</option>
+        </select>
+        <select id="lib-phase-filter" onchange="renderLib()" style="width:120px;font-size:12.5px;padding:7px 10px">
+          <option value="">Toutes phases</option>
+          <option value="1">Phase 1</option>
+          <option value="2">Phase 2</option>
+          <option value="3">Phase 3</option>
+        </select>
+      </div>
+      <div class="lib-region-tabs" id="lib-region-tabs"></div>
+      <div class="lib-exo-list" id="lib-list-modal"></div>
+      <hr>
+      <div style="font-size:12.5px;font-weight:600;margin-bottom:8px;color:var(--muted)">Ajouter un exercice personnalisé</div>
+      <div style="display:flex;gap:8px">
+        <input id="lib-new-m" placeholder="Nom de l'exercice" style="flex:1" autocomplete="off">
+        <button class="btn btn-p btn-sm" onclick="addToLib('m')">Ajouter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Évaluation -->
+  <div class="modal modal-lg" id="mo-eval" style="display:none;max-height:92vh">
+    <div class="mo-hd"><div class="mo-title">Évaluation</div><button class="mo-close" onclick="closeMo()">✕</button></div>
+    <div class="mo-bd">
+      <div class="grid g2" style="margin-bottom:14px">
+        <div class="fg"><label>Date *</label><input type="date" id="ev-date"></div>
+        <div class="fg"><label>Type</label>
+          <select id="ev-type">
+            <option value="intermediaire">Intermédiaire</option>
+            <option value="bilan-final">Bilan de fin de cycle</option>
+            <option value="bilan-initial">Bilan initial</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="exam-subsection">
+        <div class="exam-subsection-title">🔴 Douleur</div>
+        <div class="fg">
+          <label>Intensité EVA (0 = aucune → 10 = maximale)</label>
+          <div class="pain-scale" id="ev-ps"></div>
+          <input type="hidden" id="ev-eva">
+        </div>
+      </div>
+
+      <div class="exam-subsection">
+        <div class="exam-subsection-title">📐 Mobilité</div>
+        <div class="fg">
+          <textarea id="ev-mob" placeholder="ex: Flexion genou D : 125°, G : 130° — Extension D : 0°, G : 0° — Rotation…" style="min-height:90px"></textarea>
+        </div>
+      </div>
+
+      <div class="exam-subsection">
+        <div class="exam-subsection-title">💪 Force musculaire</div>
+        <div class="fg">
+          <textarea id="ev-for" placeholder="ex: Quadriceps D : 4/5, G : 5/5 — ITO flexion : 78 sec — Ischio D : 4+/5…" style="min-height:90px"></textarea>
+        </div>
+      </div>
+
+      <div class="exam-subsection">
+        <div class="exam-subsection-title">🔬 Autres tests / Tests spécifiques</div>
+        <div class="fg">
+          <textarea id="ev-aut" placeholder="ex: Single hop test : 82% — Lachman négatif — McMurray négatif — Proprioception : amélioration…" style="min-height:90px"></textarea>
+        </div>
+      </div>
+
+      <div class="exam-subsection" style="border-bottom:none;padding-bottom:0;margin-bottom:0">
+        <div class="exam-subsection-title">📝 Notes / Évolution clinique</div>
+        <div class="fg">
+          <textarea id="ev-nt" placeholder="Évolution globale, ressenti du patient, objectifs atteints, points de vigilance…" style="min-height:90px"></textarea>
+        </div>
+      </div>
+      <div id="ev-error" class="field-err" style="margin-top:8px"></div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-s" onclick="closeMo()">Annuler</button>
+      <button class="btn btn-o" onclick="saveEval()">Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- Répliquer séance -->
+  <div class="modal" id="mo-replicate" style="display:none">
+    <div class="mo-hd">
+      <div>
+        <div class="mo-title">📋 Répliquer une séance</div>
+        <div class="mo-sub">Les exercices de la séance choisie seront copiés dans la séance actuelle.</div>
+      </div>
+      <button class="mo-close" onclick="closeReplicateBackToSeance()">✕</button>
+    </div>
+    <div class="mo-bd">
+      <div id="replicate-list"></div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-s" onclick="closeReplicateBackToSeance()">Annuler</button>
+    </div>
+  </div>
+
+  <!-- Paramètres -->
+  <div class="modal modal-lg" id="mo-settings" style="display:none">
+    <div class="mo-hd"><div class="mo-title">⚙️ Paramètres &amp; Sauvegardes</div><button class="mo-close" onclick="closeMo()">✕</button></div>
+    <div class="mo-bd">
+
+      <div class="settings-section">
+        <h3>💾 Sauvegarde des données</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Vos données sont sauvegardées automatiquement dans le navigateur. Exportez régulièrement un fichier de sauvegarde.</p>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <strong>Exporter toutes les données</strong>
+            <span>Télécharge un fichier .json — à conserver précieusement.</span>
+          </div>
+          <button class="btn btn-p btn-sm" onclick="exportData()">⬇️ Exporter (.json)</button>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <strong>Importer une sauvegarde</strong>
+            <span style="color:var(--orange)">⚠ Remplace toutes les données actuelles.</span>
+          </div>
+          <label class="btn btn-s btn-sm" style="cursor:pointer">
+            ⬆️ Importer (.json)
+            <input type="file" accept=".json" onchange="importData(event)" style="display:none">
+          </label>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <strong>Espace utilisé</strong>
+            <div class="storage-bar"><div class="storage-fill" id="storage-fill" style="width:0%"></div></div>
+            <span id="storage-label">Calcul en cours…</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>📊 Statistiques</h3>
+        <div class="settings-row">
+          <div class="settings-row-info"><strong>Patients</strong></div>
+          <span id="stats-patients" style="font-size:13.5px;font-weight:600;color:var(--accent)">—</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info"><strong>Cycles créés</strong></div>
+          <span id="stats-cycles" style="font-size:13.5px;font-weight:600;color:var(--accent)">—</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info"><strong>Évaluations</strong></div>
+          <span id="stats-evals" style="font-size:13.5px;font-weight:600;color:var(--accent)">—</span>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <strong>Réinitialiser toutes les données</strong>
+            <span style="color:var(--red)">Supprime définitivement tous les patients. Irréversible.</span>
+          </div>
+          <button class="btn btn-d btn-sm" onclick="confirmReset()">🗑 Tout supprimer</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>📚 Bibliothèque d'exercices</h3>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input id="lib-new-s" placeholder="Ajouter un exercice…" style="flex:1" autocomplete="off">
+          <button class="btn btn-p btn-sm" onclick="addToLibSettings()">+ Ajouter</button>
+        </div>
+        <div id="lib-list-settings"></div>
+      </div>
+
+    </div>
+    <div class="mo-ft"><button class="btn btn-p" onclick="closeMo()">Fermer</button></div>
+  </div>
+
+</div><!-- /mo -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ════════════════════════════════
+// SUPABASE — Connexion
+// ════════════════════════════════
+const SUPABASE_URL = 'https://lkocfahrzwegndihepla.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxrb2NmYWhyendlZ25kaWhlcGxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODg3NzcsImV4cCI6MjA4OTc2NDc3N30.2sZiSyxw1QVnz8Gv99F48uBZOJAn-BMt-9PtUOLFEPc';
+const LOGIN_URL = 'login.html';
+let sb = null;
+try {
+  const mod = window.supabase;
+  if (mod && mod.createClient) sb = mod.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) { console.warn('Supabase non disponible:', e); }
+
+async function handleLogout() {
+  if (!sb) { window.location.href = LOGIN_URL; return; }
+  try {
+    await sb.auth.signOut();
+  } catch(e) { console.warn('Erreur déconnexion:', e); }
+  window.location.href = LOGIN_URL;
+}
+
+// Capturer les erreurs JS pour les afficher à l'écran
+window.onerror = function(msg, src, line) {
+  var b = document.getElementById('js-err');
+  if(b){ b.style.display='block'; b.firstChild.textContent='⚠️ Erreur JS: '+msg+' (L'+line+')'; }
+  return false;
+};
+// ════════════════════════════════
+// STORAGE & DATA
+// ════════════════════════════════
+const SK = 'kineplan_v31';
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(SK);
+    if (raw) return migrateDB(JSON.parse(raw));
+    // Try importing from older versions
+    for (const oldKey of ['kineplan_v3', 'kineplan_v2']) {
+      const old = localStorage.getItem(oldKey);
+      if (old) { console.log('PhysioPlan: import depuis', oldKey); return migrateDB(JSON.parse(old)); }
+    }
+    return freshDB();
+  } catch(e) {
+    console.warn('PhysioPlan loadDB error:', e);
+    return freshDB();
+  }
+}
+
+function freshDB() {
+  return { patients: [], library: [...DEFAULT_LIB], version: 31 };
+}
+
+function migrateDB(d) {
+  if (!d || typeof d !== 'object') return freshDB();
+  if (!Array.isArray(d.patients)) d.patients = [];
+  if (!Array.isArray(d.library) || !d.library.length) d.library = [...DEFAULT_LIB];
+  d.patients.forEach(p => {
+    if (!p.id) p.id = uid();
+    if (!p.bilan) p.bilan = {};
+    if (!Array.isArray(p.cycles)) p.cycles = [];
+    if (!Array.isArray(p.evaluations)) p.evaluations = [];
+    if (!p.seances || typeof p.seances !== 'object') p.seances = {};
+    if (!p.color) p.color = CYCLE_COLORS[0];
+    // Migrate seances stored inside cycles (old format)
+    p.cycles.forEach(c => {
+      if (c.seances && typeof c.seances === 'object') {
+        Object.assign(p.seances, c.seances);
+        delete c.seances;
+      }
+    });
+  });
+  return d;
+}
+
+// ════════════════════════════════════════════════
+// SAUVEGARDE AUTOMATIQUE ONEDRIVE
+// Envoie les données au serveur Python local
+// ════════════════════════════════════════════════
+const AUTOSAVE_URL = 'http://localhost:5678';
+let _autoSaveTimer = null;
+let _autoSaveOk = null; // null=inconnu, true=connecté, false=non connecté
+
+function autoSaveToOneDrive() {
+  // Envoi en arrière-plan — silencieux si le serveur n'est pas lancé
+  fetch(AUTOSAVE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(db)
+  })
+  .then(r => r.json())
+  .then(() => {
+    if (_autoSaveOk !== true) {
+      _autoSaveOk = true;
+      updateAutoSaveIndicator(true);
+    }
+  })
+  .catch(() => {
+    if (_autoSaveOk !== false) {
+      _autoSaveOk = false;
+      updateAutoSaveIndicator(false);
+    }
+  });
+}
+
+function updateAutoSaveIndicator(connected) {
+  const el = document.getElementById('autosave-indicator');
+  if (!el) return;
+  if (connected) {
+    el.innerHTML = '🟢 OneDrive sync';
+    el.title = 'Sauvegarde automatique OneDrive active';
+    el.style.color = 'var(--accent)';
+  } else {
+    el.innerHTML = '⚪ OneDrive hors ligne';
+    el.title = 'Serveur physioplan_save.py non détecté — vos données restent dans le navigateur';
+    el.style.color = 'var(--muted)';
+  }
+}
+
+function saveDB() {
+  try {
+    localStorage.setItem(SK, JSON.stringify(db));
+    // Envoi auto vers OneDrive (debounce 2s pour ne pas spammer)
+    if (_autoSaveTimer) clearTimeout(_autoSaveTimer);
+    _autoSaveTimer = setTimeout(autoSaveToOneDrive, 2000);
+  } catch(e) {
+    if (e.name === 'QuotaExceededError') showToast('⚠️ Stockage plein ! Exportez vos données.', 'err', 4000);
+    else showToast('⚠️ Erreur de sauvegarde', 'err');
+  }
+}
+
+// ════════════════════════════════
+// EXPORT / IMPORT
+// ════════════════════════════════
+function exportData() {
+  const json = JSON.stringify(db, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'physioplan-backup-' + today() + '.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 300);
+  showToast('✓ Sauvegarde exportée', 'ok');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      if (!parsed.patients) throw new Error('Format invalide');
+      showConfirm(
+        'Importer les données ?',
+        'Cette action remplace toutes vos données actuelles (' + db.patients.length + ' patient(s)). Action irréversible.',
+        () => {
+          db = migrateDB(parsed);
+          saveDB();
+          cpid = null;
+          document.getElementById('empty').style.display = 'flex';
+          document.getElementById('pv').style.display = 'none';
+          renderSB();
+          updateSettingsStats();
+          showToast('✓ Import réussi — ' + db.patients.length + ' patient(s)', 'ok', 3000);
+        },
+        'Importer', 'btn-o'
+      );
+    } catch(err) {
+      showToast('⚠️ Fichier invalide ou corrompu', 'err');
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ════════════════════════════════
+// CONSTANTS & STATE
+// ════════════════════════════════
+const CYCLE_COLORS = ['#2E6B56','#C06030','#3A6FA8','#8A3A8A','#A86020','#1A7A7A','#C03050','#507A20','#6A50A0','#B07A20'];
+const DEFAULT_LIB  = ['Squat','Leg press','Hip thrust','Fente avant','Romanian deadlift','Step-up','Single leg squat','Leg extension','Leg curl','Ischio allongé','Mollet debout','Planche','Gainage latéral','Dead bug','Bird dog','Vélo ergomètre','Tapis de marche','Proprioception plateau','Chaise murale','Pont fessier'];
+
+// ════════════════════════════════════════════════════════════
+// BIBLIOTHÈQUE EBP — 200+ exercices structurés (PDF Training Thérapie)
+// ════════════════════════════════════════════════════════════
+const EBP_REGIONS = [
+  {id:'all',   label:'Tous',           color:'#555555'},
+  {id:'H',     label:'Hanche',         color:'#2E6B56'},
+  {id:'G',     label:'Genou',          color:'#3A6FA8'},
+  {id:'C',     label:'Cheville',       color:'#1A7A7A'},
+  {id:'E',     label:'Épaule',         color:'#8A3A8A'},
+  {id:'Co',    label:'Coude',          color:'#C06030'},
+  {id:'P',     label:'Poignet/Main',   color:'#9A7A20'},
+  {id:'L',     label:'Lombaire',       color:'#B03A3A'},
+  {id:'T',     label:'Thoracique',     color:'#507A20'},
+  {id:'Cv',    label:'Cervical',       color:'#6A50A0'},
+  {id:'Tr',    label:'Tronc/Gainage',  color:'#A86020'},
+  {id:'perso', label:'Mes exercices',  color:'#7B7168'},
+];
+
+const EBP_LIB = [
+  // HANCHE
+  {fr:'Hip Thrust (barre)',           en:'Hip Thrust – Barbell',              region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Hip Thrust (haltère)',         en:'Hip Thrust – Dumbbell',             region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Glute Bridge bilatéral',       en:'Glute Bridge',                      region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Glute Bridge unipodal',        en:'Single Leg Glute Bridge',           region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Squat',                        en:'Squat',                             region:'H',  type:'Poly', phase:'1+2+3'},
+  {fr:'Goblet Squat',                 en:'Goblet Squat',                      region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Fentes avant',                 en:'Forward Lunge',                     region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Fentes arrière',               en:'Reverse Lunge',                     region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Bulgarian Split Squat',        en:'Bulgarian Split Squat',             region:'H',  type:'Poly', phase:'1+2+3'},
+  {fr:'Arabesques (Single Leg RDL)',   en:'Single Leg Romanian Deadlift',      region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Soulevé de terre roumain',     en:'Romanian Deadlift',                 region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Soulevé de terre',             en:'Deadlift',                          region:'H',  type:'Poly', phase:'2+3'},
+  {fr:'Soulevé de terre sumo',        en:'Sumo Deadlift',                     region:'H',  type:'Poly', phase:'2+3'},
+  {fr:'Abduction hanche cable',       en:'Hip Abduction – Cable/Band',        region:'H',  type:'Mono', phase:'1+2'},
+  {fr:'Adduction hanche cable',       en:'Hip Adduction – Cable/Band',        region:'H',  type:'Mono', phase:'1+2'},
+  {fr:'Rotation externe hanche',      en:'Hip External Rotation – Band',      region:'H',  type:'Mono', phase:'1+2'},
+  {fr:'Extension hanche cable',       en:'Hip Extension – Cable',             region:'H',  type:'Mono', phase:'1+2'},
+  {fr:'Flexion hanche cable',         en:'Hip Flexion – Cable',               region:'H',  type:'Mono', phase:'1+2'},
+  {fr:'Clamshell',                    en:'Clamshell',                         region:'H',  type:'Mono', phase:'1'},
+  {fr:'Clamshell lesté',              en:'Weighted Clamshell',                region:'H',  type:'Mono', phase:'1+2'},
+  {fr:'Kick-back fessier',            en:'Donkey Kick / Glute Kickback',      region:'H',  type:'Mono', phase:'1+2'},
+  {fr:'Fire Hydrant',                 en:'Fire Hydrant',                      region:'H',  type:'Mono', phase:'1+2'},
+  {fr:'Abduction hanche couché',      en:'Side Lying Hip Abduction',          region:'H',  type:'Mono', phase:'1+2'},
+  {fr:'Squat bulgare isométrique',    en:'Isometric Bulgarian Split Squat',   region:'H',  type:'Iso',  phase:'1'},
+  {fr:'Hip Thrust isométrique',       en:'Isometric Hip Thrust',              region:'H',  type:'Iso',  phase:'1'},
+  {fr:'Step-up',                      en:'Step-Up',                           region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Step-up latéral',              en:'Lateral Step-Up',                   region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Fentes latérales',             en:'Lateral Lunge / Side Lunge',        region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Good morning',                 en:'Good Morning',                      region:'H',  type:'Poly', phase:'1+2'},
+  {fr:'Deadlift déficit',             en:'Deficit Deadlift',                  region:'H',  type:'Poly', phase:'2+3'},
+  {fr:'Hip Circle (mobilité)',        en:'Hip Circle / CARs',                 region:'H',  type:'Mob',  phase:'1'},
+  // GENOU
+  {fr:'Leg extension',                en:'Leg Extension',                     region:'G',  type:'Mono', phase:'1+2'},
+  {fr:'Leg curl allongé',             en:'Lying Leg Curl',                    region:'G',  type:'Mono', phase:'1+2'},
+  {fr:'Leg curl assis',               en:'Seated Leg Curl',                   region:'G',  type:'Mono', phase:'1+2'},
+  {fr:'Nordic Curl',                  en:'Nordic Hamstring Curl',             region:'G',  type:'Mono', phase:'2+3'},
+  {fr:'Good morning (genou)',         en:'Good Morning',                      region:'G',  type:'Poly', phase:'1+2'},
+  {fr:'Squat (genou)',                en:'Squat',                             region:'G',  type:'Poly', phase:'1+2+3'},
+  {fr:'Bulgarian Split Squat (genou)',en:'Bulgarian Split Squat',             region:'G',  type:'Poly', phase:'1+2+3'},
+  {fr:'Fentes (genou)',               en:'Lunges',                            region:'G',  type:'Poly', phase:'1+2'},
+  {fr:'Step-down excentrique',        en:'Step-Down / Eccentric Step',        region:'G',  type:'Poly', phase:'1+2'},
+  {fr:'Step-up (genou)',              en:'Step-Up',                           region:'G',  type:'Poly', phase:'1+2'},
+  {fr:'Chaise murale (Wall Sit)',     en:'Wall Sit',                          region:'G',  type:'Iso',  phase:'1'},
+  {fr:'Squat isométrique',            en:'Isometric Squat Hold',              region:'G',  type:'Iso',  phase:'1'},
+  {fr:'Terminal Knee Extension',      en:'Terminal Knee Extension – Band',    region:'G',  type:'Mono', phase:'1+2'},
+  {fr:'Leg press',                    en:'Leg Press',                         region:'G',  type:'Poly', phase:'1+2'},
+  {fr:'Sissy Squat',                  en:'Sissy Squat',                       region:'G',  type:'Poly', phase:'1+2'},
+  {fr:'Hack Squat',                   en:'Hack Squat',                        region:'G',  type:'Poly', phase:'1+2'},
+  {fr:'Spanish Squat',                en:'Spanish Squat – Band',              region:'G',  type:'Iso',  phase:'1'},
+  {fr:'Fente latérale (genou)',       en:'Lateral Lunge',                     region:'G',  type:'Poly', phase:'1+2'},
+  {fr:'Gliding Leg Curl',             en:'Gliding Leg Curl',                  region:'G',  type:'Mono', phase:'1+2'},
+  {fr:'Régression Nordic Curl',       en:'Nordic Curl Regression',            region:'G',  type:'Mono', phase:'1+2'},
+  {fr:'Sauts verticaux',              en:'Jump / Vertical Jump',              region:'G',  type:'Plio', phase:'3'},
+  {fr:'Hop tests',                    en:'Hop Tests / Horizontal Hop',        region:'G',  type:'Plio', phase:'3'},
+  {fr:'Drop Jump',                    en:'Drop Jump',                         region:'G',  type:'Plio', phase:'3'},
+  {fr:'Leg Curl en pont',             en:'Bridge Leg Curl',                   region:'G',  type:'Mono', phase:'1+2'},
+  // CHEVILLE
+  {fr:'Mollets debout bilatéral',     en:'Standing Calf Raise',               region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Mollets debout unipodal',      en:'Single Leg Calf Raise',             region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Mollets assis (soléaire)',     en:'Seated Calf Raise',                 region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Mollets excentriques Alfredson',en:'Eccentric Heel Drop – Alfredson',  region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Tibia raise',                  en:'Tibialis Raise / Tib Bar Raise',    region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Éversion cheville élastique',  en:'Ankle Eversion – Band',             region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Inversion cheville élastique', en:'Ankle Inversion – Band',            region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Flexion plantaire élastique',  en:'Plantar Flexion – Band',            region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Flexion dorsale élastique',    en:'Dorsiflexion – Band',               region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Proprioception sol stable',    en:'Single Leg Balance – Stable',       region:'C',  type:'Iso',  phase:'1'},
+  {fr:'Proprioception sol instable',  en:'Single Leg Balance – Unstable',     region:'C',  type:'Iso',  phase:'1+2'},
+  {fr:'Y-Balance (exercice)',         en:'Y-Balance Reach',                   region:'C',  type:'Iso',  phase:'1+2'},
+  {fr:'Saut unipodal stabilisé',      en:'Single Leg Hop – Stick Landing',    region:'C',  type:'Plio', phase:'3'},
+  {fr:'Skipping / Montées genoux',    en:'Skipping / High Knees',             region:'C',  type:'Plio', phase:'3'},
+  {fr:'Calf press (leg press)',       en:'Calf Press on Leg Press',           region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Towel Scrunches (orteils)',    en:'Towel Toe Curls',                   region:'C',  type:'Mono', phase:'1'},
+  {fr:'Toe Spread / Short Foot',      en:'Toe Spread / Short Foot',           region:'C',  type:'Mono', phase:'1'},
+  {fr:'Heel Walks',                   en:'Heel Walks',                        region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Toe Walks',                    en:'Toe Walks',                         region:'C',  type:'Mono', phase:'1+2'},
+  {fr:'Drop Landing cheville',        en:'Drop Landing – Ankle Focus',        region:'C',  type:'Plio', phase:'3'},
+  {fr:'Mobilité tibio-fibulaire',     en:'Banded Ankle Mobilization',         region:'C',  type:'Mob',  phase:'1'},
+  {fr:'3D Ankle CARs',                en:'Ankle CARs',                        region:'C',  type:'Mob',  phase:'1'},
+  // ÉPAULE
+  {fr:'Développé militaire',          en:'Overhead Press / Strict Press',     region:'E',  type:'Poly', phase:'2+3'},
+  {fr:'Développé couché barre',       en:'Bench Press',                       region:'E',  type:'Poly', phase:'2+3'},
+  {fr:'Développé couché haltères',    en:'Dumbbell Bench Press',              region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Développé incliné',            en:'Incline Press',                     region:'E',  type:'Poly', phase:'2+3'},
+  {fr:'Écarté couché (pec fly)',      en:'Dumbbell Fly',                      region:'E',  type:'Mono', phase:'1+2'},
+  {fr:'Pull-over haltère',            en:'Dumbbell Pullover',                 region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Rotation externe RE1',         en:'External Rotation – Band (0 deg)',  region:'E',  type:'Mono', phase:'1+2'},
+  {fr:'Rotation externe RE2',         en:'External Rotation – Band (90 deg)', region:'E',  type:'Mono', phase:'1+2'},
+  {fr:'Rotation interne élastique',   en:'Internal Rotation – Band',          region:'E',  type:'Mono', phase:'1+2'},
+  {fr:'Rotation externe couché',      en:'Side Lying External Rotation',      region:'E',  type:'Mono', phase:'1+2'},
+  {fr:'Élévations latérales',         en:'Lateral Raise',                     region:'E',  type:'Mono', phase:'1+2'},
+  {fr:'Élévations frontales',         en:'Front Raise',                       region:'E',  type:'Mono', phase:'1+2'},
+  {fr:'Face Pull',                    en:'Face Pull',                         region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Cuban Press',                  en:'Cuban Press',                       region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'W-Y-T prone',                  en:'W-Y-T Raises Prone',                region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Tirage horizontal',            en:'Seated Cable Row',                  region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Tirage poitrine',              en:'Lat Pulldown',                      region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Pull-up / Traction',           en:'Pull-Up / Chin-Up',                 region:'E',  type:'Poly', phase:'2+3'},
+  {fr:'Scapular Pull-Up',             en:'Scapular Pull-Up',                  region:'E',  type:'Mono', phase:'1'},
+  {fr:'Tirage nuque prise large',     en:'Wide Grip Lat Pulldown',            region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Rowing haltère unilatéral',    en:'Single Arm Dumbbell Row',           region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Rowing barre',                 en:'Barbell Bent-Over Row',             region:'E',  type:'Poly', phase:'2+3'},
+  {fr:'Push-up',                      en:'Push-Up',                           region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Push-up décliné',              en:'Decline Push-Up',                   region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Pike Push-Up',                 en:'Pike Push-Up',                      region:'E',  type:'Poly', phase:'1+2'},
+  {fr:'Dips',                         en:'Dips',                              region:'E',  type:'Poly', phase:'2+3'},
+  {fr:'Band Pull-Apart',              en:'Scapular Retraction – Band',        region:'E',  type:'Mono', phase:'1+2'},
+  {fr:'Dépression scapulaire iso',    en:'Scapular Depression Hold',          region:'E',  type:'Iso',  phase:'1'},
+  {fr:'Shrug haltères',               en:'Dumbbell Shrug',                    region:'E',  type:'Mono', phase:'1+2'},
+  {fr:'CARs épaule',                  en:'Shoulder CARs',                     region:'E',  type:'Mob',  phase:'1'},
+  {fr:'Sleeper Stretch (mobilité RI)',en:'Sleeper Stretch',                   region:'E',  type:'Mob',  phase:'1'},
+  // COUDE
+  {fr:'Curl biceps haltères',         en:'Dumbbell Bicep Curl',               region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Curl biceps barre',            en:'Barbell Curl',                      region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Curl marteau',                 en:'Hammer Curl',                       region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Curl incliné (stretch curl)',  en:'Incline Dumbbell Curl',             region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Curl concentré',               en:'Concentration Curl',                region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Curl câble',                   en:'Cable Curl',                        region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Curl EZ bar',                  en:'EZ Bar Curl',                       region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Curl excentrique',             en:'Eccentric Bicep Curl',              region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Extension triceps poulie haute',en:'Tricep Pushdown – Cable',          region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Extension triceps overhead',   en:'Overhead Tricep Extension',         region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Skull Crushers',               en:'Skull Crushers',                    region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Tricep Kickback',              en:'Tricep Kickback',                   region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Dips triceps banc',            en:'Bench Dips',                        region:'Co', type:'Poly', phase:'1+2'},
+  {fr:'Extension triceps excentrique',en:'Eccentric Tricep Extension',        region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Extensions des poignets (épicondylite lat)',en:'Wrist Extension – Dumbbell', region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Flexions des poignets (épicondylite med)',en:'Wrist Flexion – Dumbbell', region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Supination/pronation forearm', en:'Forearm Supination / Pronation',    region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Reverse Curl',                 en:'Reverse Curl',                      region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Tyler Twist excentrique',      en:'Tyler Twist – Eccentric Wrist',     region:'Co', type:'Mono', phase:'1+2'},
+  {fr:'Squeeze ball / grip training', en:'Grip Squeeze / Hand Gripper',       region:'Co', type:'Iso',  phase:'1+2'},
+  {fr:'Pronation lesté',              en:'Weighted Pronation',                region:'Co', type:'Mono', phase:'1+2'},
+  // POIGNET & MAIN
+  {fr:'Extension du poignet haltère', en:'Wrist Extension – Dumbbell',        region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Flexion du poignet haltère',   en:'Wrist Flexion – Dumbbell',          region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Supination/pronation',         en:'Forearm Supination / Pronation',    region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Déviation radiale/cubitale',   en:'Radial / Ulnar Deviation',          region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Tyler Twist Flexbar',          en:'Tyler Twist – Flexbar',             region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Extension doigts élastique',   en:'Finger Extension – Band',           region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Flexion doigts (grip)',        en:'Finger Flexion / Grip Training',    region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Pince pollici-digitale',       en:'Pinch Grip Training',               region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Theraband Finger Extension',   en:'Theraband Finger Extension',        region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Maintien poignet neutre (iso)',en:'Neutral Wrist Isometric Hold',      region:'P',  type:'Iso',  phase:'1'},
+  {fr:'Opposition pouce-doigts',      en:'Thumb Opposition Exercises',        region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Intrinsic Hand Exercises',     en:'Intrinsic Hand Exercises',          region:'P',  type:'Mono', phase:'1+2'},
+  {fr:'Wrist CARs (mobilité)',        en:'Wrist CARs',                        region:'P',  type:'Mob',  phase:'1'},
+  // RACHIS LOMBAIRE
+  {fr:'Soulevé de terre (lombaire)',  en:'Deadlift',                          region:'L',  type:'Poly', phase:'2+3'},
+  {fr:'Soulevé de terre roumain (lombaire)',en:'Romanian Deadlift',           region:'L',  type:'Poly', phase:'1+2'},
+  {fr:'Back extension machine',       en:'Back Extension / Hyperextension',   region:'L',  type:'Mono', phase:'1+2'},
+  {fr:'Bird-Dog',                     en:'Bird-Dog',                          region:'L',  type:'Iso',  phase:'1'},
+  {fr:'Good morning (lombaire)',      en:'Good Morning',                      region:'L',  type:'Poly', phase:'1+2'},
+  {fr:'Kettlebell Swing',             en:'Kettlebell Swing',                  region:'L',  type:'Poly', phase:'2+3'},
+  {fr:'Planche (gainage lombaire)',   en:'Plank',                             region:'L',  type:'Iso',  phase:'1+2'},
+  {fr:'Hip Hinge (apprentissage)',    en:'Hip Hinge – Technique',             region:'L',  type:'Mob',  phase:'1'},
+  {fr:'Rotation lombaire contrôlée',  en:'Lumbar Rotation – Controlled',      region:'L',  type:'Mob',  phase:'1'},
+  {fr:'Flexion lombaire active',      en:'Active Lumbar Flexion',             region:'L',  type:'Mob',  phase:'1'},
+  {fr:'Extension lombaire isométrique',en:'Lumbar Extension Isometric',       region:'L',  type:'Iso',  phase:'1'},
+  {fr:'Jefferson Curl',               en:'Jefferson Curl',                    region:'L',  type:'Poly', phase:'1+2'},
+  {fr:'Carré des lombes latéral',     en:'Lateral Bend / QL',                 region:'L',  type:'Mono', phase:'1+2'},
+  {fr:'Pallof Press (lombaire)',      en:'Cable Rotation / Pallof Press',     region:'L',  type:'Iso',  phase:'1+2'},
+  {fr:'McKenzie extension',           en:'McKenzie Press-Up',                 region:'L',  type:'Mob',  phase:'1'},
+  {fr:'Cat-Camel (mobilité)',         en:'Cat-Cow Stretch',                   region:'L',  type:'Mob',  phase:'1'},
+  {fr:'Reverse Hyperextension',       en:'Reverse Hyperextension',            region:'L',  type:'Mono', phase:'1+2'},
+  // RACHIS THORACIQUE
+  {fr:'W-Y-T prone (thoracique)',     en:'W-Y-T Raises – Prone',              region:'T',  type:'Poly', phase:'1+2'},
+  {fr:'Rotation thoracique quadrupède',en:'Thoracic Rotation – Quadruped',   region:'T',  type:'Mob',  phase:'1'},
+  {fr:'Extension thoracique foam roller',en:'Thoracic Extension – Foam Roller',region:'T', type:'Mob', phase:'1'},
+  {fr:'Rotation thoracique assise',   en:'Seated Thoracic Rotation',          region:'T',  type:'Mob',  phase:'1'},
+  {fr:'Face Pull (thoracique)',       en:'Face Pull',                         region:'T',  type:'Poly', phase:'1+2'},
+  {fr:'Rowing (thoracique)',          en:'Seated Row',                        region:'T',  type:'Poly', phase:'1+2'},
+  {fr:'Band Pull-Apart (thoracique)', en:'Band Pull-Apart',                   region:'T',  type:'Mono', phase:'1+2'},
+  {fr:'Prone Cobra',                  en:'Prone Cobra',                       region:'T',  type:'Iso',  phase:'1'},
+  {fr:'Superman thoracique',          en:'Thoracic Superman',                 region:'T',  type:'Iso',  phase:'1+2'},
+  {fr:'Open Book (mobilité)',         en:'Open Book Stretch',                 region:'T',  type:'Mob',  phase:'1'},
+  {fr:'Extension thoracique active',  en:'Active Thoracic Extension',         region:'T',  type:'Mob',  phase:'1'},
+  {fr:'Rétraction scapulaire iso',    en:'Scapular Retraction Hold',          region:'T',  type:'Iso',  phase:'1'},
+  {fr:'Tirage poitrine prise large (thor)',en:'Wide Grip Lat Pulldown',       region:'T',  type:'Poly', phase:'1+2'},
+  // RACHIS CERVICAL
+  {fr:'Chin Tuck (flexion profonde)', en:'Deep Cervical Flexion – Chin Tuck', region:'Cv', type:'Iso',  phase:'1'},
+  {fr:'Flexion cervicale isométrique',en:'Isometric Cervical Flexion',        region:'Cv', type:'Iso',  phase:'1+2'},
+  {fr:'Extension cervicale isométrique',en:'Isometric Cervical Extension',    region:'Cv', type:'Iso',  phase:'1+2'},
+  {fr:'Rotation cervicale isométrique',en:'Isometric Cervical Rotation',      region:'Cv', type:'Iso',  phase:'1+2'},
+  {fr:'Inclinaison latérale iso (cervical)',en:'Isometric Lateral Flexion',   region:'Cv', type:'Iso',  phase:'1+2'},
+  {fr:'Shrug (renforcement cervical)',en:'Dumbbell Shrug',                    region:'Cv', type:'Mono', phase:'1+2'},
+  {fr:'Extension cervicale GHD',      en:'Neck Extension – GHD',              region:'Cv', type:'Mono', phase:'1+2'},
+  {fr:'Rotation cervicale active (CARs)',en:'Active Cervical Rotation – CARs',region:'Cv', type:'Mob',  phase:'1'},
+  {fr:'Flexion-extension cervicale (CARs)',en:'Cervical Flexion-Extension CARs',region:'Cv',type:'Mob', phase:'1'},
+  {fr:'Semi-épineux isolation',       en:'Semi-Spinalis Strengthening',       region:'Cv', type:'Iso',  phase:'1+2'},
+  {fr:'Renforcement SCM',             en:'SCM Strengthening',                 region:'Cv', type:'Iso',  phase:'1+2'},
+  {fr:'Mobilité sous-occipitaux',     en:'Sub-Occipital Release',             region:'Cv', type:'Mob',  phase:'1'},
+  {fr:'Exercice oculomoteur cervical',en:'Cervico-Ocular Exercise',           region:'Cv', type:'Iso',  phase:'1'},
+  // TRONC & GAINAGE
+  {fr:'Planche frontale',             en:'Plank / Front Plank',               region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Planche latérale',             en:'Side Plank',                        region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Planche latérale abduction',   en:'Side Plank with Hip Abduction',     region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Planche dynamique shoulder tap',en:'Dynamic Plank – Shoulder Taps',   region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Dead Bug',                     en:'Dead Bug',                          region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Bird Dog (tronc)',             en:'Bird-Dog',                          region:'Tr', type:'Iso',  phase:'1'},
+  {fr:'Hollow Body Hold',             en:'Hollow Body Hold',                  region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Crunch',                       en:'Crunch',                            region:'Tr', type:'Mono', phase:'1+2'},
+  {fr:'Crunch inverse',               en:'Reverse Crunch',                    region:'Tr', type:'Mono', phase:'1+2'},
+  {fr:'Russian Twist',                en:'Russian Twist',                     region:'Tr', type:'Poly', phase:'1+2'},
+  {fr:'Pallof Press',                 en:'Pallof Press',                      region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Rollout (roue abdominale)',     en:'Ab Wheel Rollout',                  region:'Tr', type:'Iso',  phase:'2+3'},
+  {fr:'Mountain Climbers',            en:'Mountain Climbers',                 region:'Tr', type:'Poly', phase:'2+3'},
+  {fr:'Hanging Leg Raise',            en:'Hanging Leg Raise',                 region:'Tr', type:'Mono', phase:'2+3'},
+  {fr:'Decline Sit-Up',               en:'Decline Sit-Up',                    region:'Tr', type:'Mono', phase:'1+2'},
+  {fr:'RKC Plank',                    en:'RKC Plank',                         region:'Tr', type:'Iso',  phase:'2+3'},
+  {fr:'Cable Woodchop',               en:'Cable Woodchop',                    region:'Tr', type:'Poly', phase:'1+2'},
+  {fr:'Sit-Up',                       en:'Sit-Up',                            region:'Tr', type:'Mono', phase:'1+2'},
+  {fr:'Extended Plank (haute)',       en:'Extended Plank / Planche haute',    region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Rotation médecine ball',       en:'Medicine Ball Rotation',            region:'Tr', type:'Poly', phase:'2+3'},
+  {fr:'Cable Crunch',                 en:'Cable Crunch',                      region:'Tr', type:'Mono', phase:'1+2'},
+  {fr:'Dragon Flag',                  en:'Dragon Flag',                       region:'Tr', type:'Iso',  phase:'3'},
+  {fr:'Turkish Get-Up',               en:'Turkish Get-Up',                    region:'Tr', type:'Poly', phase:'2+3'},
+  {fr:'Suitcase Carry',               en:'Suitcase Carry',                    region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Farmers Walk',                en:'Farmers Walk / Carry',             region:'Tr', type:'Iso',  phase:'1+2'},
+  {fr:'Hollow Rock',                  en:'Hollow Rock',                       region:'Tr', type:'Iso',  phase:'2+3'},
+];
+const EVA_LABELS   = {0:'Aucune',1:'Très légère',2:'Légère',3:'Modérée légère',4:'Modérée',5:'Moyenne',6:'Assez forte',7:'Forte',8:'Très forte',9:'Extrêmement forte',10:'Maximale'};
+
+let db   = loadDB();
+let cpid = null;
+let cSeance = null;
+let editingCycleId = null;
+let editingPtMode  = false;
+let calView = 'month';
+let calDate = new Date();
+let confirmCallback = null;
+
+// ════════════════════════════════
+// UTILS
+// ════════════════════════════════
+const uid      = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const clean    = s => (s || '').trim().replace(/\s+/g, ' ');
+const today    = () => new Date().toISOString().slice(0,10);
+const getPt    = () => db.patients.find(p => p.id === cpid) || null;
+
+function fmtDate(s) {
+  if (!s) return '—';
+  try { return new Date(s+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}); } catch(e) { return s; }
+}
+function fmtShort(s) {
+  if (!s) return '';
+  try { return new Date(s+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}); } catch(e) { return s; }
+}
+function ageFrom(dob) {
+  if (!dob) return null;
+  const d = new Date(dob);
+  if (isNaN(d)) return null;
+  return Math.floor((Date.now()-d)/(1000*60*60*24*365.25));
+}
+function addWks(s,w){ const d=new Date(s+'T00:00:00'); d.setDate(d.getDate()+w*7); return d.toISOString().slice(0,10); }
+function addDays(s,n){ const d=new Date(s+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function initials(n){ return n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2); }
+function isValidDate(s){ if(!s) return false; const d=new Date(s+'T00:00:00'); return !isNaN(d.getTime()); }
+
+// ════════════════════════════════
+// TOAST
+// ════════════════════════════════
+let _tt = null;
+function showToast(msg, type='', dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = type; t.style.opacity = '1';
+  if (_tt) clearTimeout(_tt);
+  _tt = setTimeout(() => t.style.opacity = '0', dur);
+}
+
+// ════════════════════════════════
+// CONFIRM DIALOG
+// ════════════════════════════════
+function showConfirm(title, msg, cb, btnLabel='Supprimer', btnCls='btn-d') {
+  confirmCallback = cb;
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent   = msg;
+  const ok = document.getElementById('confirm-ok');
+  ok.textContent = btnLabel;
+  ok.className   = 'btn ' + btnCls;
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+function closeConfirm(yes) {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  if (yes && confirmCallback) { try { confirmCallback(); } catch(e) { console.error(e); } }
+  confirmCallback = null;
+}
+
+// ════════════════════════════════
+// PAIN SCALE & RPE
+// ════════════════════════════════
+function buildPS(cid, hid) {
+  const c = document.getElementById(cid); if (!c) return; c.innerHTML = '';
+  for (let i=0; i<=10; i++) {
+    const b = document.createElement('button');
+    b.type='button'; b.className='pb'; b.dataset.v=i; b.textContent=i; b.title=EVA_LABELS[i]||'';
+    b.onclick = () => { c.querySelectorAll('.pb').forEach(x=>x.classList.remove('on')); b.classList.add('on'); document.getElementById(hid).value=i; };
+    c.appendChild(b);
+  }
+}
+function setPS(cid, hid, v) {
+  const val=parseInt(v); if(isNaN(val)) return;
+  const c=document.getElementById(cid); if(!c) return;
+  document.getElementById(hid).value=val;
+  c.querySelectorAll('.pb').forEach(b=>b.classList.toggle('on', parseInt(b.dataset.v)===val));
+}
+function buildRPE(cid, hid) {
+  const c=document.getElementById(cid); if(!c) return; c.innerHTML='';
+  for (let i=0; i<=10; i++) {
+    const b=document.createElement('button');
+    b.type='button'; b.className='rpe-btn'; b.dataset.r=i; b.textContent=i;
+    b.onclick=()=>{ c.querySelectorAll('.rpe-btn').forEach(x=>x.classList.remove('on')); b.classList.add('on'); document.getElementById(hid).value=i; };
+    c.appendChild(b);
+  }
+}
+function setRPE(cid, hid, v) {
+  const val=parseInt(v); if(isNaN(val)) return;
+  const c=document.getElementById(cid); if(!c) return;
+  document.getElementById(hid).value=val;
+  c.querySelectorAll('.rpe-btn').forEach(b=>b.classList.toggle('on', parseInt(b.dataset.r)===val));
+}
+
+// ════════════════════════════════
+// COLOR PICKER
+// ════════════════════════════════
+function buildColorPicker(sel) {
+  const c=document.getElementById('cy-colors'); c.innerHTML='';
+  CYCLE_COLORS.forEach(col => {
+    const s=document.createElement('div');
+    s.className='cp-sw'+(col===sel?' on':''); s.style.background=col; s.title=col;
+    s.onclick=()=>{ c.querySelectorAll('.cp-sw').forEach(x=>x.classList.remove('on')); s.classList.add('on'); document.getElementById('cy-color').value=col; };
+    c.appendChild(s);
+  });
+}
+
+// ════════════════════════════════
+// CYCLE HELPERS
+// ════════════════════════════════
+function cycleProgress(c) {
+  const start=new Date(c.debut+'T00:00:00'), end=new Date(addWks(c.debut,c.dur)+'T00:00:00'), now=new Date();
+  if (now<start) return {pct:0,  status:'avenir',  lbl:'À venir'};
+  if (now>=end)  return {pct:100,status:'termine', lbl:'Terminé'};
+  return {pct:Math.min(99,Math.round(((now-start)/(end-start))*100)), status:'encours', lbl:'En cours'};
+}
+function genSeances(c) {
+  const list=[], freq=Math.max(1,Math.min(7,parseInt(c.freq)||2)), dur=Math.max(1,parseInt(c.dur)||4);
+  const total=freq*dur, gap=7/freq, base=new Date(c.debut+'T00:00:00');
+  for (let i=0; i<total; i++) {
+    const d=new Date(base); d.setDate(base.getDate()+Math.round(i*gap));
+    list.push(d.toISOString().slice(0,10));
+  }
+  return list;
+}
+function getPendingEvals(pid) {
+  const p=db.patients.find(x=>x.id===pid); if(!p) return 0;
+  const evals=p.evaluations||[]; let n=0;
+  (p.cycles||[]).forEach(c=>{
+    if(!c.evf) return;
+    genSeances(c).forEach((date,i)=>{
+      if ((i+1)%c.evf===0 && date<=today()) {
+        if (!evals.some(e=>Math.abs(new Date(e.date)-new Date(date))<1000*60*60*24*5)) n++;
+      }
+    });
+  });
+  return n;
+}
+
+// ════════════════════════════════
+// MODAL
+// ════════════════════════════════
+function openMo(id) {
+  document.getElementById('mo').classList.add('open');
+  document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+  document.getElementById(id).style.display='block';
+}
+function closeMo() {
+  document.getElementById('mo').classList.remove('open');
+}
+function closeMoOverlay(e) {
+  if (e.target===document.getElementById('mo')) closeMo();
+}
+
+// ════════════════════════════════
+// SIDEBAR
+// ════════════════════════════════
+function renderSB(q='') {
+  const el=document.getElementById('sb-list');
+  const qn=q.toLowerCase();
+  const f=db.patients.filter(p=>(p.prenom+' '+p.nom).toLowerCase().includes(qn)||(p.patho||'').toLowerCase().includes(qn));
+  if (!f.length) { el.innerHTML='<div style="color:rgba(255,255,255,.3);font-size:12px;padding:12px 14px">'+(db.patients.length?'Aucun résultat':'Aucun patient')+'</div>'; return; }
+  el.innerHTML=f.map(p=>{
+    const dot=getPendingEvals(p.id)>0?'<div class="pt-dot"></div>':'';
+    const age=ageFrom(p.dob);
+    return `<div class="pt-item${p.id===cpid?' on':''}" onclick="selPt('${p.id}')">
+      <div class="pt-av" style="background:${p.color||'rgba(255,255,255,.12)'}">${initials(p.prenom+' '+p.nom)}</div>
+      <div class="pt-inf">
+        <div class="pt-name">${p.prenom} ${p.nom}</div>
+        <div class="pt-sub">${age?age+' ans':''}${p.patho?(age?' · ':'')+p.patho:''}</div>
+      </div>${dot}</div>`;
+  }).join('');
+}
+function filterPts(v) { renderSB(v); }
+
+// ════════════════════════════════
+// SELECT PATIENT
+// ════════════════════════════════
+function selPt(id) {
+  cpid=id; const p=getPt(); if(!p) return;
+  renderSB(document.getElementById('sb-inp').value);
+  document.getElementById('ph-av').textContent=initials(p.prenom+' '+p.nom);
+  document.getElementById('ph-av').style.background=p.color||'var(--accent)';
+  document.getElementById('ph-name').textContent=p.prenom+' '+p.nom;
+  const age=ageFrom(p.dob);
+  const parts=[];
+  if(age) parts.push(age+' ans');
+  if(p.patho) parts.push(p.patho);
+  if(p.bilan&&p.bilan.deb) parts.push('Suivi depuis '+fmtDate(p.bilan.deb));
+  document.getElementById('ph-meta').innerHTML=parts.map(m=>`<span>${m}</span>`).join('');
+  document.getElementById('empty').style.display='none';
+  document.getElementById('pv').style.display='flex';
+  loadBilan(p); renderCycles(p); renderEvals(p); renderDash(p); updateEvalBadge(p);
+  swTab('dashboard');
+  calDate=new Date();
+}
+
+// ════════════════════════════════
+// TABS
+// ════════════════════════════════
+function swTab(name) {
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.tab-p').forEach(p=>p.classList.remove('on'));
+  const tb=document.getElementById('t-'+name);
+  const panel=document.getElementById('p-'+name);
+  if(tb) tb.classList.add('on');
+  if(panel) panel.classList.add('on');
+  if(name==='calendar') renderCal();
+  if(name==='dashboard') { const p=getPt(); if(p) renderDash(p); }
+}
+
+// ════════════════════════════════
+// PATIENT CRUD
+// ════════════════════════════════
+function openAddPatient() {
+  editingPtMode=false;
+  document.getElementById('mo-pt-title').textContent='Nouveau patient';
+  document.getElementById('mo-pt-save').textContent='Créer le patient';
+  ['pt-prenom','pt-nom','pt-dob','pt-patho'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pt-error').textContent='';
+  openMo('mo-pt');
+  setTimeout(()=>document.getElementById('pt-prenom').focus(),50);
+}
+function openEditPt() {
+  const p=getPt(); if(!p) return;
+  editingPtMode=true;
+  document.getElementById('mo-pt-title').textContent='Modifier le patient';
+  document.getElementById('mo-pt-save').textContent='Enregistrer';
+  document.getElementById('pt-prenom').value=p.prenom;
+  document.getElementById('pt-nom').value=p.nom;
+  document.getElementById('pt-dob').value=p.dob||'';
+  document.getElementById('pt-patho').value=p.patho||'';
+  document.getElementById('pt-error').textContent='';
+  openMo('mo-pt');
+}
+function savePt() {
+  const prenom=clean(document.getElementById('pt-prenom').value);
+  const nom   =clean(document.getElementById('pt-nom').value);
+  const dob   =document.getElementById('pt-dob').value;
+  const patho =clean(document.getElementById('pt-patho').value);
+  const errEl =document.getElementById('pt-error');
+  errEl.textContent='';
+  if(!prenom){errEl.textContent='Le prénom est requis.'; return;}
+  if(!nom)   {errEl.textContent='Le nom est requis.'; return;}
+  if(dob&&!isValidDate(dob)){errEl.textContent='Date de naissance invalide.'; return;}
+  if(dob&&new Date(dob)>new Date()){errEl.textContent='Date de naissance dans le futur.'; return;}
+  // Doublon
+  const fullName=prenom.toLowerCase()+' '+nom.toLowerCase();
+  const dup=db.patients.some(p=>{
+    if(editingPtMode&&p.id===cpid) return false;
+    return (p.prenom.toLowerCase()+' '+p.nom.toLowerCase())===fullName;
+  });
+  if(dup){errEl.textContent=`Un patient "${prenom} ${nom}" existe déjà.`; return;}
+  if(editingPtMode) {
+    const p=getPt(); p.prenom=prenom; p.nom=nom; p.dob=dob; p.patho=patho;
+    saveDB(); closeMo(); selPt(p.id); renderSB(); showToast('✓ Patient modifié','ok');
+  } else {
+    const p={id:uid(),prenom,nom,dob,patho,color:CYCLE_COLORS[db.patients.length%CYCLE_COLORS.length],bilan:{},cycles:[],evaluations:[],seances:{}};
+    db.patients.push(p); saveDB(); closeMo(); renderSB(); selPt(p.id); showToast('✓ Patient créé','ok');
+  }
+}
+function confirmDeletePt() {
+  const p=getPt(); if(!p) return;
+  showConfirm(`Supprimer ${p.prenom} ${p.nom} ?`,
+    `Ce dossier contient ${(p.cycles||[]).length} cycle(s) et ${(p.evaluations||[]).length} évaluation(s). Action irréversible.`,
+    ()=>{ db.patients=db.patients.filter(x=>x.id!==cpid); saveDB(); cpid=null;
+      document.getElementById('empty').style.display='flex';
+      document.getElementById('pv').style.display='none';
+      renderSB(); showToast('✓ Patient supprimé'); });
+}
+
+// ════════════════════════════════
+// BILAN
+// ════════════════════════════════
+function loadBilan(p) {
+  const b=p.bilan||{};
+  document.getElementById('b-diag').value =b.diag||'';
+  document.getElementById('b-deb').value  =b.deb||'';
+  document.getElementById('b-ant').value  =b.ant||'';
+  // Douleur
+  document.getElementById('b-dloc').value =b.dloc||'';
+  document.getElementById('b-dcar').value =b.dcar||'';
+  document.getElementById('b-damp').value =b.damp||'';
+  document.getElementById('b-dnoc').value =b.dnoc||'';
+  document.getElementById('b-daut').value =b.daut||'';
+  // Examen physique
+  document.getElementById('b-insp').value =b.insp||'';
+  document.getElementById('b-mob').value  =b.mob||'';
+  document.getElementById('b-for').value  =b.force||'';
+  document.getElementById('b-neuro').value=b.neuro||'';
+  document.getElementById('b-fonc').value =b.fonc||'';
+  document.getElementById('b-aut').value  =b.aut||'';
+  // Objectifs & notes
+  document.getElementById('b-oc').value   =b.oc||'';
+  document.getElementById('b-ol').value   =b.ol||'';
+  document.getElementById('b-nt').value   =b.nt||'';
+  buildPS('b-ps','b-eva');
+  if(b.eva!==undefined&&b.eva!=='') setPS('b-ps','b-eva',b.eva);
+}
+function saveBilan() {
+  const p=getPt(); if(!p) return;
+  const g=id=>document.getElementById(id);
+  p.bilan={
+    // Infos générales
+    diag: clean(g('b-diag').value),
+    deb:  g('b-deb').value,
+    ant:  g('b-ant').value.trim(),
+    // Douleur
+    eva:  g('b-eva').value,
+    dloc: clean(g('b-dloc').value),
+    dcar: clean(g('b-dcar').value),
+    damp: clean(g('b-damp').value),
+    dnoc: clean(g('b-dnoc').value),
+    daut: clean(g('b-daut').value),
+    // Examen physique
+    insp:  g('b-insp').value.trim(),
+    mob:   g('b-mob').value.trim(),
+    force: g('b-for').value.trim(),
+    neuro: g('b-neuro').value.trim(),
+    fonc:  g('b-fonc').value.trim(),
+    aut:   g('b-aut').value.trim(),
+    // Objectifs & notes
+    oc: g('b-oc').value.trim(),
+    ol: g('b-ol').value.trim(),
+    nt: g('b-nt').value.trim(),
+  };
+  saveDB(); showToast('✓ Bilan enregistré','ok');
+}
+
+// ════════════════════════════════
+// CYCLES
+// ════════════════════════════════
+function openAddCycle() {
+  editingCycleId=null;
+  document.getElementById('mo-cy-title').textContent='Nouveau cycle';
+  document.getElementById('cy-save-btn').textContent='Créer le cycle';
+  document.getElementById('cy-nom').value='';
+  document.getElementById('cy-deb').value=today();
+  document.getElementById('cy-dur').value='4';
+  document.getElementById('cy-freq').value='2';
+  document.getElementById('cy-evf').value='';
+  document.getElementById('cy-obj').value='';
+  document.getElementById('cy-ctn').value='';
+  document.getElementById('cy-error').textContent='';
+  document.getElementById('cy-preview').style.display='none';
+  buildColorPicker(CYCLE_COLORS[0]);
+  document.getElementById('cy-color').value=CYCLE_COLORS[0];
+  openMo('mo-cycle');
+  updateCyclePreview();
+}
+function openEditCycle(cycleId) {
+  const p=getPt(); const c=(p.cycles||[]).find(x=>x.id===cycleId); if(!c) return;
+  editingCycleId=cycleId;
+  document.getElementById('mo-cy-title').textContent='Modifier le cycle';
+  document.getElementById('cy-save-btn').textContent='Enregistrer';
+  document.getElementById('cy-nom').value=c.nom;
+  document.getElementById('cy-deb').value=c.debut;
+  document.getElementById('cy-dur').value=c.dur;
+  document.getElementById('cy-freq').value=c.freq;
+  document.getElementById('cy-evf').value=c.evf||'';
+  document.getElementById('cy-obj').value=c.obj||'';
+  document.getElementById('cy-ctn').value=c.ctn||'';
+  document.getElementById('cy-error').textContent='';
+  buildColorPicker(c.color||CYCLE_COLORS[0]);
+  document.getElementById('cy-color').value=c.color||CYCLE_COLORS[0];
+  openMo('mo-cycle');
+  updateCyclePreview();
+}
+function updateCyclePreview() {
+  const prev=document.getElementById('cy-preview');
+  const dur=parseInt(document.getElementById('cy-dur').value)||0;
+  const freq=parseInt(document.getElementById('cy-freq').value)||0;
+  const evf=parseInt(document.getElementById('cy-evf').value)||0;
+  if(dur>0&&freq>0){
+    const total=dur*freq, evals=evf>0?Math.floor(total/evf):0;
+    prev.style.display='block';
+    prev.textContent='→ '+total+' séances au total sur '+dur+' semaines'+(evals>0?' · '+evals+' évaluation(s) prévue(s)':'');
+  } else { prev.style.display='none'; }
+}
+function saveCycle() {
+  const p=getPt(); if(!p) return;
+  const nom  =clean(document.getElementById('cy-nom').value);
+  const debut=document.getElementById('cy-deb').value;
+  const dur  =parseInt(document.getElementById('cy-dur').value);
+  const freq =parseInt(document.getElementById('cy-freq').value);
+  const evf  =parseInt(document.getElementById('cy-evf').value)||null;
+  const color=document.getElementById('cy-color').value;
+  const errEl=document.getElementById('cy-error');
+  errEl.textContent='';
+  if(!nom){errEl.textContent="L'intitulé est requis."; return;}
+  if(!debut||!isValidDate(debut)){errEl.textContent='Date invalide.'; return;}
+  if(!dur||dur<1||dur>52){errEl.textContent='Durée entre 1 et 52 semaines.'; return;}
+  if(!freq||freq<1||freq>7){errEl.textContent='Fréquence entre 1 et 7/semaine.'; return;}
+  if(editingCycleId) {
+    const c=p.cycles.find(x=>x.id===editingCycleId);
+    if(c) Object.assign(c,{nom,debut,dur,freq,evf,color,obj:document.getElementById('cy-obj').value.trim(),ctn:document.getElementById('cy-ctn').value.trim()});
+    showToast('✓ Cycle modifié','ok');
+  } else {
+    if(!p.cycles) p.cycles=[];
+    p.cycles.push({id:uid(),nom,debut,dur,freq,evf,color,obj:document.getElementById('cy-obj').value.trim(),ctn:document.getElementById('cy-ctn').value.trim()});
+    showToast('✓ Cycle créé','ok');
+  }
+  editingCycleId=null;
+  saveDB(); closeMo(); renderCycles(p); renderCal();
+}
+function confirmDeleteCycle(cycleId) {
+  const p=getPt(); const c=(p.cycles||[]).find(x=>x.id===cycleId); if(!c) return;
+  showConfirm(`Supprimer le cycle "${c.nom}" ?`,
+    `${genSeances(c).length} séances seront supprimées. Action irréversible.`,
+    ()=>{ p.cycles=p.cycles.filter(x=>x.id!==cycleId);
+      Object.keys(p.seances||{}).forEach(k=>{if(k.startsWith(cycleId+'_')) delete p.seances[k];});
+      saveDB(); renderCycles(p); renderCal(); updateEvalBadge(p); showToast('✓ Cycle supprimé'); });
+}
+function openCopyCycle() {
+  const p=getPt(); if(!p||!p.cycles||!p.cycles.length){showToast('⚠️ Aucun cycle à copier','err'); return;}
+  const sel=document.getElementById('copy-src');
+  sel.innerHTML=p.cycles.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+  document.getElementById('copy-nom').value='';
+  document.getElementById('copy-deb').value=today();
+  updateCopyInfo();
+  openMo('mo-copy');
+}
+function updateCopyInfo() {
+  const p=getPt(); const id=document.getElementById('copy-src').value;
+  const c=(p.cycles||[]).find(x=>x.id===id); const el=document.getElementById('copy-info');
+  if(!c){el.textContent=''; return;}
+  el.innerHTML=`<strong>${c.nom}</strong> — ${c.dur} sem., ${c.freq} séance(s)/sem. = <strong>${genSeances(c).length} séances</strong>${c.evf?', éval. toutes les '+c.evf+' séances':''}`;
+}
+function doCopyCycle() {
+  const p=getPt(); const srcId=document.getElementById('copy-src').value;
+  const src=(p.cycles||[]).find(x=>x.id===srcId); if(!src) return;
+  const nom=clean(document.getElementById('copy-nom').value)||src.nom+' (copie)';
+  const deb=document.getElementById('copy-deb').value||today();
+  if(!isValidDate(deb)){showToast('⚠️ Date invalide','err'); return;}
+  p.cycles.push({...JSON.parse(JSON.stringify(src)),id:uid(),nom,debut:deb});
+  saveDB(); closeMo(); renderCycles(p); renderCal(); showToast('✓ Cycle copié','ok');
+}
+function renderCycles(p) {
+  const el=document.getElementById('cycles-list');
+  const cycles=p.cycles||[];
+  if(!cycles.length){el.innerHTML='<div class="empty-list"><svg width="40" height="40" fill="none" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" stroke="currentColor" stroke-width="1.5"/><path d="M13 20h14M20 13v14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p>Aucun cycle. Créez votre premier cycle de travail.</p></div>'; return;}
+  el.innerHTML=cycles.map(c=>{
+    const prog=cycleProgress(c), seances=genSeances(c), fin=addWks(c.debut,c.dur), color=c.color||'var(--accent)', sd=p.seances||{};
+    const seancesHtml=seances.map((date,i)=>{
+      const num=i+1, isEval=c.evf&&num%c.evf===0, isPast=date<today(), isToday=date===today();
+      const key=c.id+'_'+i, data=sd[key]||{};
+      // Utiliser la date custom si elle a été définie
+      const dispDate = data.date || date;
+      const dispPast  = dispDate < today();
+      const dispToday = dispDate === today();
+      const dateModified = !!data.date && data.date !== date;
+      const noteP=data.notes?`<span class="s-note-prev">${data.notes.slice(0,60)}${data.notes.length>60?'…':''}</span>`:'';
+      const rpeT=data.rpe!==undefined&&data.rpe!==''?`<span class="badge badge-gray" style="font-size:10px">RPE ${data.rpe}</span>`:'';
+      const _totalExos=(data.blocs||[]).reduce((a,b)=>a+(b.exos||[]).length,0)+(data.exos||[]).length;
+      const exoT=_totalExos?`<span class="badge badge-ok" style="font-size:10px">${_totalExos} ex.</span>`:'';
+      // Badges format (SS, Circuit, AMRAP, EMOM)
+      const _fmtLabels={ss:'SS',circuit:'Circuit',amrap:'AMRAP',emom:'EMOM'};
+      const _fmtCls={ss:'fmt-badge-ss',circuit:'fmt-badge-circuit',amrap:'fmt-badge-amrap',emom:'fmt-badge-emom'};
+      const fmtT=(data.blocs||[]).filter(b=>b.format&&b.format!=='libre').map(b=>{
+        const lbl=_fmtLabels[b.format]||b.format;
+        const cls=_fmtCls[b.format]||'';
+        const tours=(b.format==='circuit'||b.format==='amrap')&&b.tours?` ${b.tours}×`:'';
+        return `<span class="fmt-badge ${cls}">${lbl}${tours}</span>`;
+      }).filter((v,i,a)=>a.indexOf(v)===i).join('');
+      const dateTag=dateModified?`<span class="tag" style="background:var(--gold-l);color:var(--gold);font-size:10px">✏️ modifiée</span>`:'';
+      return `<div class="seance-item${dispPast?' done':''}${isEval?' eval-due':''}${dispToday?' today-s':''}" onclick="openSeance('${c.id}',${i})">
+        <div class="sn">${dispPast?'✓':dispToday?'▶':num}</div>
+        <div class="s-date">${fmtDate(dispDate)}</div>
+        <div class="s-label">Séance ${num}${isEval?' — Évaluation prévue':''}</div>
+        ${noteP}
+        <div class="s-badges">${exoT}${fmtT}${rpeT}${dateTag}<span class="tag ${isEval?'tag-e':'tag-s'}">${isEval?'📊 Éval.':'Séance'}</span>${dispToday?'<span class="tag" style="background:var(--accent);color:#fff">Aujourd\'hui</span>':''}</div>
+      </div>`;
+    }).join('');
+    return `<div class="cycle-card">
+      <div class="cycle-hd">
+        <div style="min-width:0">
+          <div class="cc-title"><span style="width:11px;height:11px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span>${c.nom}<span class="cycle-sb s-${prog.status}">${prog.lbl}</span></div>
+          <div class="cc-meta"><span>📅 ${fmtDate(c.debut)} → ${fmtDate(fin)}</span><span>🔁 ${c.dur} sem. · ${c.freq}/sem.</span>${c.evf?`<span>📊 Éval. toutes les ${c.evf} séances</span>`:''}</div>
+        </div>
+        <div style="display:flex;gap:7px;flex-shrink:0">
+          <button class="btn btn-s btn-sm" onclick="openEditCycle('${c.id}')">✏️ Modifier</button>
+          <button class="btn btn-d btn-sm" onclick="confirmDeleteCycle('${c.id}')">🗑</button>
+        </div>
+      </div>
+      <div class="cycle-bd">
+        <div class="prog-wrap"><div class="prog-lbl"><span>Avancement</span><span>${prog.pct}%</span></div><div class="prog-track"><div class="prog-fill" style="width:${prog.pct}%;background:${color}"></div></div></div>
+        ${c.obj?`<p style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6"><strong style="color:var(--text)">Objectifs :</strong> ${c.obj}</p>`:''}
+        ${c.ctn?`<p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6"><strong style="color:var(--text)">Contenu :</strong> ${c.ctn}</p>`:''}
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px">Planning — cliquez sur une séance pour la modifier</div>
+        ${seancesHtml}
+      </div></div>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+// SEANCE MODAL
+// ════════════════════════════════
+function openSeance(cycleId, idx) {
+  const p=getPt(); if(!p) return;
+  const c=(p.cycles||[]).find(x=>x.id===cycleId); if(!c) return;
+  const seances=genSeances(c); if(idx<0||idx>=seances.length) return;
+  const date=seances[idx], num=idx+1, isEval=c.evf&&num%c.evf===0, isPast=date<today(), isToday=date===today();
+  cSeance={cycleId,idx};
+  if(!p.seances) p.seances={};
+  const key=cycleId+'_'+idx;
+  if(!p.seances[key]) p.seances[key]={blocs:[],notes:'',rpe:''};
+  else if(p.seances[key].exos!==undefined) p.seances[key]=migrateSeanceData(p.seances[key]);
+  const sd=p.seances[key];
+  // Date effective : custom si définie, sinon calculée
+  const effectiveDate = sd.date || date;
+  const effPast  = effectiveDate < today();
+  const effToday = effectiveDate === today();
+  document.getElementById('mo-s-title').textContent='Séance '+num+' — '+c.nom;
+  document.getElementById('mo-s-sub').textContent=(isEval?' 📊 Évaluation intermédiaire prévue':'');
+  const badge=document.getElementById('mo-s-badge');
+  badge.innerHTML=effToday?'<span class="badge badge-ok">Aujourd\'hui</span>':effPast?'<span class="badge badge-gray">Séance passée</span>':'<span class="badge badge-mid">À venir</span>';
+  document.getElementById('s-date').value=effectiveDate;
+  document.getElementById('s-notes').value=sd.notes||'';
+  buildRPE('s-rpe-bar','s-rpe');
+  if(sd.rpe!==undefined&&sd.rpe!=='') setRPE('s-rpe-bar','s-rpe',sd.rpe);
+  renderBlocs();
+  openMo('mo-seance');
+}
+// ════════════════════════════════
+// CONSTANTES BLOCS
+// ════════════════════════════════
+const BLOC_COLORS = [
+  {id:'blue',  bg:'#EBF3FB', border:'#3A6FA8', strip:'#3A6FA8', label:'Bleu'},
+  {id:'green', bg:'#E8F2EE', border:'#2E6B56', strip:'#2E6B56', label:'Vert'},
+  {id:'orange',bg:'#FBF0E6', border:'#C06030', strip:'#C06030', label:'Orange'},
+  {id:'purple',bg:'#F3EEF8', border:'#8A3A8A', strip:'#8A3A8A', label:'Violet'},
+  {id:'gold',  bg:'#FBF5E0', border:'#9A7A20', strip:'#9A7A20', label:'Or'},
+  {id:'red',   bg:'#FAECEC', border:'#B03A3A', strip:'#B03A3A', label:'Rouge'},
+  {id:'teal',  bg:'#E5F4F4', border:'#1A7A7A', strip:'#1A7A7A', label:'Turquoise'},
+];
+const DEFAULT_BLOC_NAMES = ['Échauffement','Corps de séance','Récupération','Travail spécifique','Proprioception'];
+
+function getBlocColor(id) {
+  return BLOC_COLORS.find(c=>c.id===id) || BLOC_COLORS[1];
+}
+
+// ════════════════════════════════
+// MIGRATION DONNÉES ANCIENNES
+// Convertit {exos:[]} → {blocs:[{nom,couleur,exos:[]}]}
+// ════════════════════════════════
+function migrateSeanceData(sd) {
+  if (!sd) return { blocs: [], notes: '', rpe: '' };
+  // Déjà au nouveau format
+  if (sd.blocs) return sd;
+  // Ancien format : on met les exos dans un bloc unique "Séance"
+  const exos = sd.exos || [];
+  return {
+    blocs: exos.length ? [{ nom: 'Séance', couleur: 'green', exos }] : [],
+    notes: sd.notes || '',
+    rpe:   sd.rpe || '',
+    date:  sd.date,
+  };
+}
+
+// ════════════════════════════════
+// RENDU DES BLOCS
+// ════════════════════════════════
+function rpeOpts(currentRpe) {
+  const rVal = currentRpe !== undefined && currentRpe !== '' ? parseInt(currentRpe) : -1;
+  const noSel = rVal < 0 ? '<option value="" disabled selected>—</option>' : '';
+  return noSel + Array.from({length:11}, (_,r) =>
+    `<option value="${r}"${rVal===r?' selected':''}>${r}${r===0?' — Repos':r<=3?' — Facile':r<=5?' — Modéré':r<=7?' — Difficile':' — Max'}</option>`
+  ).join('');
+}
+
+function renderBlocs() {
+  const d = getSD(); if (!d) return;
+  const container = document.getElementById('blocs-container');
+  const empty     = document.getElementById('blocs-empty');
+  const blocs = d.blocs || [];
+
+  if (!blocs.length) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  const nb = blocs.length;
+
+  container.innerHTML = blocs.map((bloc, bi) => {
+    const col = getBlocColor(bloc.couleur || 'green');
+    const exos = bloc.exos || [];
+    const ne = exos.length;
+
+    // Color picker swatches
+    const swatches = BLOC_COLORS.map(c =>
+      `<div class="bcp-sw${bloc.couleur===c.id?' on':''}" style="background:${c.strip}" title="${c.label}" onclick="setBlocColor(${bi},'${c.id}')"></div>`
+    ).join('');
+
+    // Table des exercices du bloc
+    const rows = exos.map((e, ei) => {
+      const rpeCls = parseInt(e.rpe)>=8?'rpe-hi':parseInt(e.rpe)>=5?'rpe-mid':'';
+      return `<tr class="exo-tr" draggable="true"
+        ondragstart="exoDragStart(event,${bi},${ei})"
+        ondragover="exoDragOver(event,${bi},${ei})"
+        ondragleave="exoDragLeave(event)"
+        ondrop="exoDrop(event,${bi},${ei})">
+        <td class="col-handle"><span class="drag-handle" title="Glisser pour réordonner">⠿</span></td>
+        <td><input value="${e.lib||''}" placeholder="Exercice…" oninput="updateBlocExo(${bi},${ei},'lib',this.value)" style="min-width:140px"></td>
+        <td><input type="number" value="${e.series||''}" placeholder="3" min="1" oninput="updateBlocExo(${bi},${ei},'series',this.value)" style="width:100%"></td>
+        <td><input value="${e.reps||''}" placeholder="10" oninput="updateBlocExo(${bi},${ei},'reps',this.value)" style="width:100%"></td>
+        <td><input value="${e.charge||''}" placeholder="40 kg" oninput="updateBlocExo(${bi},${ei},'charge',this.value)" style="width:100%"></td>
+        <td><input value="${e.tempo||''}" placeholder="2-0-2" oninput="updateBlocExo(${bi},${ei},'tempo',this.value)" style="width:100%"></td>
+        <td><input value="${e.recup||''}" placeholder="60s" oninput="updateBlocExo(${bi},${ei},'recup',this.value)" style="width:100%"></td>
+        <td><select class="exo-rpe-select ${rpeCls}" onchange="setBlocExoRPE(${bi},${ei},parseInt(this.value));updateRpeSelectStyle(this)">${rpeOpts(e.rpe)}</select></td>
+        <td>
+          <button type="button" class="exo-row-del" onclick="removeBlocExo(${bi},${ei})">✕</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    const tableHtml = exos.length
+      ? `<table class="bloc-table">
+          <thead><tr>
+            <th class="col-handle"></th>
+            <th style="min-width:140px">Exercice</th>
+            <th style="width:50px">Séries</th>
+            <th style="width:50px">Rép.</th>
+            <th style="width:68px">Charge</th>
+            <th style="width:68px">Tempo</th>
+            <th style="width:58px">Récup.</th>
+            <th style="width:68px">RPE</th>
+            <th style="width:30px"></th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`
+      : `<div class="bloc-empty">Aucun exercice dans ce bloc. Ajoutez-en un ci-dessous.</div>`;
+
+    return `<div class="bloc-wrap" data-bi="${bi}" style="border-color:${col.border}"
+      draggable="true"
+      ondragstart="blocDragStart(event,${bi})"
+      ondragover="blocDragOver(event,${bi})"
+      ondragleave="blocDragLeave(event)"
+      ondrop="blocDrop(event,${bi})">
+      <div class="bloc-header" style="background:${col.bg}">
+        <div class="bloc-header-top">
+          <div class="drag-handle" title="Glisser pour réordonner le bloc">⠿</div>
+          <div class="bloc-color-strip" style="background:${col.strip}"></div>
+          <input class="bloc-name-input" value="${bloc.nom||''}" placeholder="Nom du bloc…" oninput="updateBlocName(${bi},this.value)">
+          <div class="bloc-color-picker">${swatches}</div>
+          <div class="bloc-actions">
+            <button class="order-btn" onclick="moveBloc(${bi},-1)" ${bi===0?'disabled':''} title="Monter le bloc">↑</button>
+            <button class="order-btn" onclick="moveBloc(${bi},1)" ${bi===nb-1?'disabled':''} title="Descendre le bloc">↓</button>
+            <button class="bloc-add-exo-btn" onclick="addBlocExoFromLib(${bi})">📚</button>
+            <button class="bloc-add-exo-btn" onclick="addBlocExo(${bi})">+ Exercice</button>
+            <button class="bloc-del-btn" onclick="removeBloc(${bi})" title="Supprimer ce bloc">✕</button>
+          </div>
+        </div>
+        <div class="bloc-header-bottom">
+          <span style="font-size:10px;font-weight:600;color:rgba(0,0,0,.35);text-transform:uppercase;letter-spacing:.4px;margin-right:2px">Format</span>
+          ${['libre','ss','circuit','amrap','emom'].map(f=>{
+            const labels={libre:'Libre',ss:'SS',circuit:'Circuit',amrap:'AMRAP',emom:'EMOM'};
+            const fmt=bloc.format||'libre';
+            return `<button class="bloc-fmt-btn fmt-${f}${fmt===f?' on':''}" onclick="setBlocFormat(${bi},'${f}')">${labels[f]}</button>`;
+          }).join('')}
+          ${(bloc.format==='circuit'||bloc.format==='amrap')?`<span style="display:inline-flex;align-items:center;gap:4px;margin-left:6px;flex-shrink:0"><span class="bloc-tours-label">Nb de tours :</span><input class="bloc-tours-input" type="number" min="1" max="99" value="${bloc.tours||3}" placeholder="3" oninput="setBlocTours(${bi},this.value)" title="Nombre de tours"></span>`:''}
+        </div>
+      </div>
+      <div class="bloc-table-wrap" style="background:${col.bg}22">${tableHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════
+// ACTIONS SUR LES BLOCS
+// ════════════════════════════════
+function getSD() {
+  const p=getPt(); if(!p||!cSeance) return null;
+  const key=cSeance.cycleId+'_'+cSeance.idx;
+  if(!p.seances) p.seances={};
+  if(!p.seances[key]) p.seances[key]={blocs:[],notes:'',rpe:''};
+  // Migration transparente si ancien format
+  if(p.seances[key].exos !== undefined) p.seances[key] = migrateSeanceData(p.seances[key]);
+  return p.seances[key];
+}
+
+function addBloc() {
+  const d=getSD(); if(!d) return;
+  if(!d.blocs) d.blocs=[];
+  const nom = DEFAULT_BLOC_NAMES[d.blocs.length] || 'Bloc '+(d.blocs.length+1);
+  const couleur = BLOC_COLORS[d.blocs.length % BLOC_COLORS.length].id;
+  d.blocs.push({ nom, couleur, exos:[] });
+  renderBlocs();
+}
+
+function removeBloc(bi) {
+  const d=getSD(); if(!d||!d.blocs[bi]) return;
+  const nb=d.blocs[bi].exos.length;
+  if(nb>0){
+    showConfirm('Supprimer ce bloc ?','Ce bloc contient '+nb+' exercice(s). Cette action est irréversible.',()=>{
+      const d2=getSD(); if(!d2||!d2.blocs[bi]) return;
+      d2.blocs.splice(bi,1); renderBlocs();
+    },'Supprimer','btn-d');
+  } else {
+    d.blocs.splice(bi,1); renderBlocs();
+  }
+}
+
+function updateBlocName(bi,val) {
+  const d=getSD(); if(!d||!d.blocs[bi]) return;
+  d.blocs[bi].nom=clean(val);
+}
+
+// ════════════════════════════════════════════════════
+// RÉORDONNANCEMENT — blocs et exercices
+// ════════════════════════════════════════════════════
+
+// ── FLÈCHES ─────────────────────────────────────────
+function moveBloc(bi, dir) {
+  const d=getSD(); if(!d||!d.blocs) return;
+  const ti = bi + dir;
+  if(ti<0||ti>=d.blocs.length) return;
+  const tmp = d.blocs[bi];
+  d.blocs[bi] = d.blocs[ti];
+  d.blocs[ti] = tmp;
+  renderBlocs();
+}
+
+function moveExo(bi, ei, dir) {
+  const d=getSD(); if(!d||!d.blocs[bi]) return;
+  const exos = d.blocs[bi].exos;
+  const ti = ei + dir;
+  if(ti<0||ti>=exos.length) return;
+  const tmp = exos[ei];
+  exos[ei] = exos[ti];
+  exos[ti] = tmp;
+  renderBlocs();
+}
+
+// ── DRAG & DROP BLOCS ───────────────────────────────
+let _dragBlocIdx = null;
+
+function blocDragStart(e, bi) {
+  _dragBlocIdx = bi;
+  if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON'||e.target.tagName==='SELECT') {
+    e.preventDefault(); return;
+  }
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', String(bi));
+  const el = e.currentTarget; // capturer AVANT le setTimeout
+  setTimeout(() => { if(el) el.classList.add('dragging'); }, 0);
+}
+
+function blocDragOver(e, bi) {
+  if(_dragBlocIdx===null||_dragBlocIdx===bi) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.bloc-wrap').forEach(el => el.classList.remove('drag-over'));
+  const el = document.querySelector('.bloc-wrap[data-bi="'+bi+'"]');
+  if(el) el.classList.add('drag-over');
+}
+
+function blocDragLeave(e) {
+  const el = e.currentTarget;
+  if(el && !el.contains(e.relatedTarget)) {
+    el.classList.remove('drag-over');
+  }
+}
+
+function blocDrop(e, targetBi) {
+  e.preventDefault();
+  document.querySelectorAll('.bloc-wrap,.exo-tr').forEach(el => {
+    el.classList.remove('dragging','drag-over');
+  });
+  if(_dragBlocIdx===null||_dragBlocIdx===targetBi) { _dragBlocIdx=null; return; }
+  const d=getSD(); if(!d||!d.blocs) { _dragBlocIdx=null; return; }
+  // Déplacer le bloc source vers la position cible
+  const moved = d.blocs.splice(_dragBlocIdx, 1)[0];
+  const insertAt = _dragBlocIdx < targetBi ? targetBi : targetBi;
+  d.blocs.splice(insertAt < d.blocs.length ? insertAt : d.blocs.length, 0, moved);
+  _dragBlocIdx = null;
+  renderBlocs();
+}
+
+// ── DRAG & DROP EXERCICES ───────────────────────────
+let _dragExo = null; // {bi, ei}
+
+function exoDragStart(e, bi, ei) {
+  if(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON'||e.target.tagName==='SELECT') {
+    e.preventDefault(); return;
+  }
+  _dragExo = {bi, ei};
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', bi+','+ei);
+  const row = e.currentTarget; // capturer AVANT le setTimeout
+  setTimeout(() => { if(row) row.classList.add('dragging'); }, 0);
+}
+
+function exoDragOver(e, bi, ei) {
+  if(!_dragExo||(_dragExo.bi===bi&&_dragExo.ei===ei)) return;
+  if(_dragExo.bi !== bi) return; // pas de déplacement inter-blocs
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.exo-tr').forEach(r=>r.classList.remove('drag-over'));
+  e.currentTarget.classList.add('drag-over');
+}
+
+function exoDragLeave(e) {
+  if(e.currentTarget) e.currentTarget.classList.remove('drag-over');
+}
+
+function exoDrop(e, bi, ei) {
+  e.preventDefault();
+  document.querySelectorAll('.exo-tr').forEach(r=>r.classList.remove('dragging','drag-over'));
+  if(!_dragExo||_dragExo.bi!==bi||_dragExo.ei===ei) { _dragExo=null; return; }
+  const d=getSD(); if(!d||!d.blocs[bi]) { _dragExo=null; return; }
+  const exos = d.blocs[bi].exos;
+  const moved = exos.splice(_dragExo.ei, 1)[0];
+  const insertAt = _dragExo.ei < ei ? ei : ei;
+  exos.splice(insertAt < exos.length ? insertAt : exos.length, 0, moved);
+  _dragExo = null;
+  renderBlocs();
+}
+
+function setBlocColor(bi,colorId) {
+  const d=getSD(); if(!d||!d.blocs[bi]) return;
+  d.blocs[bi].couleur=colorId;
+  renderBlocs();
+}
+
+function setBlocFormat(bi, fmt) {
+  const d=getSD(); if(!d||!d.blocs[bi]) return;
+  d.blocs[bi].format = fmt;
+  // Initialiser tours à 3 si on passe en circuit/amrap
+  if((fmt==='circuit'||fmt==='amrap') && !d.blocs[bi].tours) d.blocs[bi].tours = 3;
+  renderBlocs();
+}
+
+function setBlocTours(bi, val) {
+  const d=getSD(); if(!d||!d.blocs[bi]) return;
+  const n = parseInt(val);
+  d.blocs[bi].tours = (!isNaN(n) && n>0) ? n : 3;
+}
+
+function addBlocExo(bi, lib) {
+  const d=getSD(); if(!d||!d.blocs[bi]) return;
+  d.blocs[bi].exos.push({lib:lib||'',series:'',reps:'',charge:'',tempo:'',recup:'',rpe:''});
+  renderBlocs();
+}
+
+function removeBlocExo(bi,ei) {
+  const d=getSD(); if(!d||!d.blocs[bi]) return;
+  d.blocs[bi].exos.splice(ei,1);
+  renderBlocs();
+}
+
+function updateBlocExo(bi,ei,field,val) {
+  const d=getSD(); if(!d||!d.blocs[bi]||!d.blocs[bi].exos[ei]) return;
+  d.blocs[bi].exos[ei][field]=clean(val);
+}
+
+function setBlocExoRPE(bi,ei,r) {
+  const d=getSD(); if(!d||!d.blocs[bi]||!d.blocs[bi].exos[ei]) return;
+  d.blocs[bi].exos[ei].rpe=String(r);
+}
+
+// Ouvrir la bibliothèque pour un bloc spécifique
+let _currentBlocForLib = null;
+function addBlocExoFromLib(bi) {
+  _currentBlocForLib = bi;
+  openLib();
+}
+
+function updateRpeSelectStyle(sel) {
+  const v=parseInt(sel.value);
+  sel.className='exo-rpe-select'+(v>=8?' rpe-hi':v>=5?' rpe-mid':'');
+}
+
+// Compatibilité : addExoRow appelé depuis la bibliothèque
+function addExoRow(lib) {
+  if(_currentBlocForLib !== null) {
+    addBlocExo(_currentBlocForLib, lib);
+    _currentBlocForLib = null;
+  } else {
+    // Si pas de bloc : en créer un automatiquement
+    const d=getSD(); if(!d) return;
+    if(!d.blocs||!d.blocs.length) addBloc();
+    addBlocExo(d.blocs.length-1, lib);
+  }
+}
+function saveSeance() {
+  const p=getPt(); if(!p||!cSeance) return;
+  const key=cSeance.cycleId+'_'+cSeance.idx;
+  if(!p.seances) p.seances={};
+  if(!p.seances[key]) p.seances[key]={blocs:[]};
+  else if(p.seances[key].exos!==undefined) p.seances[key]=migrateSeanceData(p.seances[key]);
+  const savedDate = document.getElementById('s-date').value;
+  // Ne stocker la date custom que si elle diffère de la date calculée
+  const calcDate = genSeances(p.cycles.find(c=>c.id===cSeance.cycleId)||{})[cSeance.idx] || savedDate;
+  p.seances[key].date  = (savedDate && savedDate !== calcDate) ? savedDate : undefined;
+  p.seances[key].notes = document.getElementById('s-notes').value.trim();
+  p.seances[key].rpe   = document.getElementById('s-rpe').value;
+  saveDB(); closeMo(); renderCycles(p); renderCal(); showToast('✓ Séance enregistrée','ok');
+}
+
+// ════════════════════════════════
+// REPLICATE SEANCE
+// ════════════════════════════════
+function openReplicatePicker() {
+  const p = getPt(); if (!p || !cSeance) return;
+  const el = document.getElementById('replicate-list');
+
+  // Collecter toutes les séances passées qui ont des exercices, sauf la séance actuelle
+  const currentKey = cSeance.cycleId + '_' + cSeance.idx;
+  const items = [];
+
+  (p.cycles || []).forEach(c => {
+    const seances = genSeances(c);
+    seances.forEach((date, i) => {
+      const key = c.id + '_' + i;
+      if (key === currentKey) return; // exclure la séance courante
+      const sd = (p.seances || {})[key];
+      const sdM = sd ? migrateSeanceData(sd) : null;
+      const _bls = sdM && sdM.blocs || [];
+      if (!_bls.some(b=>b.exos&&b.exos.length)) return;
+      const effectiveDate = (sd && sd.date) || date;
+      items.push({ key, cycleId: c.id, idx: i, date: effectiveDate, cycleName: c.nom, num: i + 1, blocs: _bls, notes: sdM.notes || '' });
+    });
+  });
+
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-list"><p>Aucune séance avec des exercices trouvée.<br>Enregistrez d&#39;abord des exercices dans une séance précédente.</p></div>';
+  } else {
+    // Trier par date décroissante (plus récente en premier)
+    items.sort((a, b) => b.date.localeCompare(a.date));
+    el.innerHTML = items.map(item => {
+      const _allExos = (item.blocs||[]).flatMap(b=>b.exos||[]);
+      const exoPreview = _allExos.slice(0,3).map(e=>e.lib||'—').join(', ')+(_allExos.length>3?` +${_allExos.length-3}`:'');
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--bg);border:1px solid var(--border);border-radius:9px;margin-bottom:8px;gap:12px;flex-wrap:wrap">
+        <div style="min-width:0">
+          <div style="font-weight:600;font-size:13.5px;margin-bottom:3px">Séance ${item.num} — ${item.cycleName}</div>
+          <div style="font-size:12px;color:var(--muted)">📅 ${fmtDate(item.date)} · ${_allExos.length} exercice(s) · ${(item.blocs||[]).length} bloc(s)</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;font-style:italic">${exoPreview}</div>
+        </div>
+        <button class="btn btn-p btn-sm" onclick="applyReplicate('${item.key}')">Copier cette séance</button>
+      </div>`;
+    }).join('');
+  }
+
+  // Basculer vers la modale de sélection
+  document.getElementById('mo-replicate').style.display = 'block';
+  document.getElementById('mo-seance').style.display = 'none';
+}
+
+function closeReplicateBackToSeance() {
+  document.getElementById('mo-replicate').style.display = 'none';
+  document.getElementById('mo-seance').style.display = 'block';
+}
+
+function applyReplicate(sourceKey) {
+  const p = getPt(); if (!p || !cSeance) return;
+  const sourceSD = migrateSeanceData((p.seances || {})[sourceKey]);
+  const sourceBlocs = sourceSD && sourceSD.blocs || [];
+  const totalExos = sourceBlocs.reduce((a,b)=>a+(b.exos||[]).length,0);
+  if (!totalExos) { showToast('⚠️ Séance source introuvable', 'err'); return; }
+
+  // Copie profonde des blocs
+  const currentKey = cSeance.cycleId + '_' + cSeance.idx;
+  if (!p.seances) p.seances = {};
+  if (!p.seances[currentKey]) p.seances[currentKey] = { blocs: [], notes: '', rpe: '' };
+  else if (p.seances[currentKey].exos !== undefined) p.seances[currentKey] = migrateSeanceData(p.seances[currentKey]);
+
+  p.seances[currentKey].blocs = sourceBlocs.map(b => ({
+    ...b,
+    exos: (b.exos||[]).map(e => ({ ...e }))
+  }));
+
+  closeReplicateBackToSeance();
+  renderBlocs();
+  showToast('✓ ' + totalExos + ' exercice(s) en ' + sourceBlocs.length + ' bloc(s) copiés', 'ok', 3500);
+}
+
+// ════════════════════════════════
+// LIBRARY
+// ════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// BIBLIOTHÈQUE — nouvelle version structurée EBP
+// ════════════════════════════════════════════════════════════
+let _libRegion = 'all'; // onglet actif
+
+function getRegionColor(regionId) {
+  const r = EBP_REGIONS.find(x=>x.id===regionId);
+  return r ? r.color : '#7B7168';
+}
+
+// Retourne la liste fusionnée : EBP + exercices perso (db.library)
+// On filtre pour ne pas dupliquer ceux déjà dans EBP
+function getLib() {
+  if(!Array.isArray(db.library)) db.library = [...DEFAULT_LIB];
+  const ebpFr = new Set(EBP_LIB.map(e=>e.fr.toLowerCase()));
+  const perso = db.library.filter(x => !ebpFr.has(x.toLowerCase()));
+  return perso;
+}
+
+function addToLib(src) {
+  const id = src==='s' ? 'lib-new-s' : 'lib-new-m';
+  const val = clean(document.getElementById(id).value);
+  if(!val) return;
+  if(!db.library) db.library = [...DEFAULT_LIB];
+  const ebpFr = new Set(EBP_LIB.map(e=>e.fr.toLowerCase()));
+  if(ebpFr.has(val.toLowerCase())){ showToast('⚠️ Exercice déjà dans la bibliothèque EBP','err'); return; }
+  if(db.library.some(x=>x.toLowerCase()===val.toLowerCase())){ showToast('⚠️ Exercice déjà présent','err'); return; }
+  db.library.push(val); saveDB();
+  document.getElementById(id).value = '';
+  if(src==='s') renderLibSettings();
+  else renderLib();
+  showToast('✓ Exercice ajouté','ok');
+}
+function addToLibSettings() { addToLib('s'); }
+function removeFromLib(name) {
+  db.library = db.library.filter(x=>x!==name); saveDB(); renderLibSettings(); showToast('✓ Supprimé');
+}
+
+function openLib() {
+  _libRegion = 'all';
+  openMo('mo-lib');
+  // Construire les onglets régions
+  const tabsEl = document.getElementById('lib-region-tabs');
+  tabsEl.innerHTML = EBP_REGIONS.map(r =>
+    `<button class="lib-rtab${r.id==='all'?' on':''}" style="${r.id!=='all'?'border-color:'+r.color+';color:'+r.color+';':''}" onclick="setLibRegion('${r.id}')" id="lib-rtab-${r.id}">${r.label}</button>`
+  ).join('');
+  document.getElementById('lib-search').value = '';
+  document.getElementById('lib-type-filter').value = '';
+  document.getElementById('lib-phase-filter').value = '';
+  renderLib();
+}
+
+function setLibRegion(regionId) {
+  _libRegion = regionId;
+  // Mettre à jour les onglets
+  document.querySelectorAll('.lib-rtab').forEach(b => {
+    const rid = b.id.replace('lib-rtab-','');
+    const col = getRegionColor(rid);
+    b.classList.toggle('on', rid===regionId);
+    if(rid===regionId && rid!=='all') {
+      b.style.background = col;
+      b.style.color = '#fff';
+      b.style.borderColor = col;
+    } else if(rid!=='all') {
+      b.style.background = '';
+      b.style.color = col;
+      b.style.borderColor = col;
+    } else {
+      b.style.background = rid===regionId ? 'var(--text)' : '';
+      b.style.color = rid===regionId ? '#fff' : '';
+    }
+  });
+  renderLib();
+}
+
+function renderLib() {
+  const el     = document.getElementById('lib-list-modal');
+  const q      = (document.getElementById('lib-search').value||'').toLowerCase();
+  const typeF  = document.getElementById('lib-type-filter').value;
+  const phaseF = document.getElementById('lib-phase-filter').value;
+
+  // Exercices EBP filtrés
+  let list = EBP_LIB.filter(e => {
+    if(_libRegion !== 'all' && _libRegion !== 'perso' && e.region !== _libRegion) return false;
+    if(typeF && e.type !== typeF) return false;
+    if(phaseF && !e.phase.includes(phaseF)) return false;
+    if(q && !e.fr.toLowerCase().includes(q) && !e.en.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  // Exercices perso
+  const perso = getLib().filter(x => {
+    if(_libRegion !== 'all' && _libRegion !== 'perso') return false;
+    if(q && !x.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  // Mise à jour compteur
+  const total = list.length + perso.length;
+  const countEl = document.getElementById('lib-count-sub');
+  if(countEl) countEl.textContent = total + ' exercice(s)';
+
+  if(!list.length && !perso.length) {
+    el.innerHTML = '<div class="empty-list"><p>Aucun exercice trouvé.</p></div>';
+    return;
+  }
+
+  // Rendu exercices EBP
+  const ebpHtml = list.map(e => {
+    const col = getRegionColor(e.region);
+    const typeBg = e.type==='Poly'?'#EBF3FB':e.type==='Mono'?'#E8F2EE':e.type==='Iso'?'#FBF5E0':e.type==='Plio'?'#FAECEC':'#F3EEF8';
+    const typeCol= e.type==='Poly'?'#3A6FA8':e.type==='Mono'?'#2E6B56':e.type==='Iso'?'#9A7A20':e.type==='Plio'?'#B03A3A':'#8A3A8A';
+    const phases = e.phase.split('+').map(p =>
+      `<span class="lib-badge" style="background:${p==='1'?'#e8f2ee':p==='2'?'#EBF3FB':'#FAECEC'};color:${p==='1'?'#2E6B56':p==='2'?'#3A6FA8':'#B03A3A'}">P${p}</span>`
+    ).join('');
+    const safeEn = e.en.replace(/"/g,'&quot;');
+    const safeFr = e.fr.replace(/"/g,'&quot;');
+    return `<div class="lib-exo-row" onclick="pickFromLibEbp('${safeFr}','${safeEn}')">
+      <div class="lib-exo-color" style="background:${col}"></div>
+      <div class="lib-exo-info">
+        <div class="lib-exo-fr">${e.fr}</div>
+        <div class="lib-exo-en">${e.en}</div>
+      </div>
+      <div class="lib-exo-badges">
+        <span class="lib-badge" style="background:${typeBg};color:${typeCol}">${e.type}</span>
+        ${phases}
+      </div>
+      <button class="lib-add-btn" onclick="event.stopPropagation();pickFromLibEbp('${safeFr}','${safeEn}')">+ Ajouter</button>
+    </div>`;
+  }).join('');
+
+  // Rendu exercices perso
+  const persoHtml = perso.map(x => {
+    const safe = x.replace(/"/g,'&quot;');
+    return `<div class="lib-exo-row" onclick="pickFromLib('${safe}')">
+      <div class="lib-exo-color" style="background:#7B7168"></div>
+      <div class="lib-exo-info">
+        <div class="lib-exo-fr">${x}</div>
+        <div class="lib-exo-en" style="font-style:italic">Exercice personnalisé</div>
+      </div>
+      <button class="lib-add-btn" onclick="event.stopPropagation();pickFromLib('${safe}')">+ Ajouter</button>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = ebpHtml + (perso.length && (_libRegion==='all'||_libRegion==='perso')
+    ? (list.length ? '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 4px 4px">Mes exercices</div>' : '')
+    + persoHtml : '');
+}
+
+// Choisir depuis la bibliothèque EBP : propose FR ou EN
+let _pendingLibFr = null, _pendingLibEn = null;
+function pickFromLibEbp(fr, en) {
+  // Si FR = EN, ajouter directement
+  if(fr===en) { closeLibBackToSeance(); addExoRow(fr); return; }
+  // Sinon proposer le choix
+  _pendingLibFr = fr; _pendingLibEn = en;
+  showConfirm(
+    'Quel nom utiliser ?',
+    fr + '  /  ' + en,
+    () => { closeLibBackToSeance(); addExoRow(_pendingLibFr||fr); },
+    'Nom français', 'btn-p'
+  );
+  // Remplacer le bouton OK pour permettre le choix EN aussi
+  setTimeout(() => {
+    const box = document.querySelector('.confirm-actions');
+    if(box && !box.querySelector('.lib-en-btn')) {
+      const enBtn = document.createElement('button');
+      enBtn.className = 'btn btn-s lib-en-btn';
+      enBtn.textContent = 'Nom anglais';
+      enBtn.onclick = () => { closeConfirm(false); closeLibBackToSeance(); addExoRow(_pendingLibEn||en); };
+      box.insertBefore(enBtn, box.querySelector('#confirm-ok'));
+    }
+  }, 30);
+}
+
+function renderLibSettings() {
+  const el = document.getElementById('lib-list-settings');
+  const perso = getLib();
+  el.innerHTML = perso.map(x=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:4px">
+    <span style="font-size:13px">${x}</span>
+    <button class="btn btn-d btn-xs" onclick="removeFromLib(this.dataset.name)" data-name="${x.replace(/"/g,'&quot;')}">🗑</button>
+  </div>`).join('') || '<div style="font-size:13px;color:var(--muted);padding:8px 0">Aucun exercice personnalisé. Les exercices EBP sont dans la bibliothèque.</div>';
+}
+function closeLibBackToSeance() { openMo('mo-seance'); }
+function pickFromLib(name) { closeLibBackToSeance(); addExoRow(name); }
+
+// ════════════════════════════════
+// CALENDAR
+// ════════════════════════════════
+function setCalView(v) {
+  calView=v;
+  document.getElementById('vt-month').classList.toggle('on',v==='month');
+  document.getElementById('vt-week').classList.toggle('on',v==='week');
+  renderCal();
+}
+function calNav(dir) {
+  if(calView==='month') calDate=new Date(calDate.getFullYear(),calDate.getMonth()+dir,1);
+  else calDate=new Date(calDate.getTime()+dir*7*24*60*60*1000);
+  renderCal();
+}
+function calToday() { calDate=new Date(); renderCal(); }
+function buildCalEvents(p) {
+  const map={};
+  const add=(date,ev)=>{ if(!map[date]) map[date]=[]; map[date].push(ev); };
+  (p.cycles||[]).forEach(c=>{
+    const color=c.color||'#2E6B56', seances=genSeances(c);
+    seances.forEach((date,i)=>{ 
+      const num=i+1, isEval=c.evf&&num%c.evf===0;
+      const key=c.id+'_'+i, customDate=(p.seances&&p.seances[key]&&p.seances[key].date)||date;
+      add(customDate,{type:isEval?'eval':'seance',label:'S'+num+' · '+c.nom,color,cycleId:c.id,idx:i});
+    });
+    seances.forEach((date,i)=>{
+      if(i>=seances.length-1) return;
+      const gap=Math.round((new Date(seances[i+1])-new Date(date))/86400000);
+      for(let d=1;d<gap&&d<=3;d++) add(addDays(date,d),{type:'rest',label:'🛌 Repos',color:'#aaa',cycleId:c.id,idx:-1});
+    });
+  });
+  return map;
+}
+function renderCal() {
+  const p=getPt(); if(!p) return;
+  const events=buildCalEvents(p), title=document.getElementById('cal-title'), body=document.getElementById('cal-body'), todayS=today();
+  if(calView==='month') {
+    const yr=calDate.getFullYear(), mo=calDate.getMonth();
+    title.textContent=new Date(yr,mo,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+    let dow=new Date(yr,mo,1).getDay(); dow=(dow+6)%7;
+    const dim=new Date(yr,mo+1,0).getDate(), dip=new Date(yr,mo,0).getDate();
+    let html=`<div class="cal-dow-row">${['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].map(l=>`<div class="cal-dow-cell">${l}</div>`).join('')}</div><div class="cal-grid-m">`;
+    let total=dow+dim; while(total%7!==0) total++;
+    for(let i=0;i<total;i++){
+      let d, other=false;
+      if(i<dow){d=dip-(dow-1-i);other=true;}
+      else if(i>=dow+dim){d=i-(dow+dim)+1;other=true;}
+      else d=i-dow+1;
+      const ds=other?'':`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday=ds===todayS, evs=ds?(events[ds]||[]):[];
+      const evHtml=evs.slice(0,3).map(e=>{
+        if(e.type==='rest') return `<div class="cal-ev" style="background:#f0edea;color:#aaa">${e.label}</div>`;
+        const click=e.idx>=0?`onclick="openSeance('${e.cycleId}',${e.idx})"`:'' ;
+        return `<div class="cal-ev" style="background:${e.color}22;color:${e.color}" ${click}>${e.label}</div>`;
+      }).join('');
+      const more=evs.length>3?`<div style="font-size:10px;color:var(--muted);padding:1px 5px">+${evs.length-3} autre(s)</div>`:'';
+      html+=`<div class="cal-day${other?' other-m':''}${isToday?' today-c':''}"><div class="cal-day-num">${d}</div>${evHtml}${more}</div>`;
+    }
+    body.innerHTML=html+'</div>';
+  } else {
+    const d=new Date(calDate), dow=(d.getDay()+6)%7, wStart=new Date(d);
+    wStart.setDate(d.getDate()-dow);
+    const days=[]; for(let i=0;i<7;i++){const x=new Date(wStart);x.setDate(wStart.getDate()+i);days.push(x.toISOString().slice(0,10));}
+    const DOW=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+    title.textContent='Semaine du '+fmtShort(days[0])+' au '+fmtShort(days[6]);
+    let html=`<div class="wk-grid"><div class="wk-hd"></div>${days.map((ds,i)=>`<div class="wk-hd${ds===todayS?' today-wh':''}">${DOW[i]}<br><span style="font-size:15px;font-weight:700">${parseInt(ds.slice(8))}</span></div>`).join('')}`;
+    ['Séances','Repos'].forEach((slot,si)=>{
+      html+=`<div class="wk-slot-lbl"><span>${slot}</span></div>`;
+      days.forEach(ds=>{
+        const evs=(events[ds]||[]).filter(e=>si===0?e.type!=='rest':e.type==='rest');
+        html+=`<div class="wk-cell"${ds===todayS?' style="background:var(--accent-l)"':''}>`;
+        evs.forEach(e=>{
+          const bg=e.type==='rest'?'#f0edea':e.color+'22', fg=e.type==='rest'?'#aaa':e.color;
+          const click=e.idx>=0?`onclick="openSeance('${e.cycleId}',${e.idx})"`:'' ;
+          html+=`<div class="wk-ev" style="background:${bg};border-left:3px solid ${e.type==='rest'?'#ccc':e.color};color:${fg}" ${click}>${e.label}</div>`;
+        });
+        html+='</div>';
+      });
+    });
+    body.innerHTML=html+'</div>';
+  }
+}
+
+// ════════════════════════════════
+// EVALUATIONS
+// ════════════════════════════════
+function openAddEval() {
+  document.getElementById('ev-date').value=today();
+  document.getElementById('ev-type').value='intermediaire';
+  ['ev-mob','ev-for','ev-aut','ev-nt'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('ev-error').textContent='';
+  buildPS('ev-ps','ev-eva');
+  openMo('mo-eval');
+}
+function saveEval() {
+  const p=getPt(); if(!p) return;
+  const date=document.getElementById('ev-date').value;
+  const errEl=document.getElementById('ev-error'); errEl.textContent='';
+  if(!date||!isValidDate(date)){errEl.textContent='Date invalide.'; return;}
+  if(!p.evaluations) p.evaluations=[];
+  p.evaluations.push({id:uid(),date,type:document.getElementById('ev-type').value,
+    eva:document.getElementById('ev-eva').value,mob:clean(document.getElementById('ev-mob').value),
+    force:clean(document.getElementById('ev-for').value),aut:clean(document.getElementById('ev-aut').value),
+    nt:document.getElementById('ev-nt').value.trim()});
+  p.evaluations.sort((a,b)=>b.date.localeCompare(a.date));
+  saveDB(); closeMo(); renderEvals(p); updateEvalBadge(p); renderSB(); showToast('✓ Évaluation enregistrée','ok');
+}
+function confirmDeleteEval(eid) {
+  showConfirm('Supprimer cette évaluation ?','Action irréversible.',()=>{
+    const p=getPt(); if(!p) return;
+    p.evaluations=p.evaluations.filter(e=>e.id!==eid);
+    saveDB(); renderEvals(p); updateEvalBadge(p); showToast('✓ Évaluation supprimée');
+  });
+}
+function updateEvalBadge(p) {
+  const b=document.getElementById('ev-badge'), n=getPendingEvals(p.id);
+  b.style.display=n>0?'inline-block':'none'; b.textContent=n;
+}
+// ════════════════════════════════
+// ÉVALUATIONS — COMPARAISON
+// ════════════════════════════════
+let _compareIds = [null, null]; // [idA (récente), idB (ancienne)]
+
+function renderEvals(p) {
+  const el=document.getElementById('evals-list');
+  const alEl=document.getElementById('eval-alerts');
+  const cpanel=document.getElementById('eval-compare-panel');
+  const evals=p.evaluations||[], pending=getPendingEvals(p.id);
+
+  alEl.innerHTML=pending>0
+    ?`<div class="alert-bar"><span style="font-size:18px">🔔</span><div><strong>${pending} évaluation(s) à réaliser</strong> selon votre planning.</div><button class="btn btn-o btn-sm" onclick="openAddEval()" style="margin-left:auto">Saisir</button></div>`
+    :'';
+
+  if(!evals.length){
+    el.innerHTML='<div class="empty-list"><p>Aucune évaluation.</p></div>';
+    cpanel.style.display='none';
+    return;
+  }
+
+  const TYPE_MAP={
+    'intermediaire':{lbl:'Intermédiaire',cls:'et-inter'},
+    'bilan-final':{lbl:'Bilan final',cls:'et-final'},
+    'bilan-initial':{lbl:'Bilan initial',cls:'et-init'}
+  };
+
+  // Auto-comparaison : les 2 premières (plus récente vs précédente)
+  const autoA = evals[0];
+  const autoB = evals.length>1 ? evals[1] : null;
+
+  // Comparaison manuelle si définie et valide
+  const manA = _compareIds[0] ? evals.find(e=>e.id===_compareIds[0]) : null;
+  const manB = _compareIds[1] ? evals.find(e=>e.id===_compareIds[1]) : null;
+  const useManual = manA && manB && manA.id !== manB.id;
+
+  const cmpA = useManual ? manA : autoA;
+  const cmpB = useManual ? manB : autoB;
+
+  // Rendu du panel de comparaison
+  if(cmpB) {
+    cpanel.style.display='block';
+    cpanel.innerHTML = renderComparePanel(cmpA, cmpB, evals, useManual);
+  } else {
+    cpanel.style.display='none';
+  }
+
+  // Rendu de la liste des évaluations
+  el.innerHTML=evals.map((e,idx)=>{
+    const eva=(e.eva!==''&&e.eva!==undefined)?parseInt(e.eva):null;
+    const pc=eva===null?'':eva<=3?'badge-ok':eva<=6?'badge-mid':'badge-bad';
+    const tm=TYPE_MAP[e.type]||TYPE_MAP['intermediaire'];
+
+    // Diff EVA auto avec l'évaluation suivante (plus ancienne)
+    let evaDiff='';
+    if(idx<evals.length-1){
+      const pe=evals[idx+1];
+      const pEva=(pe.eva!==''&&pe.eva!==undefined)?parseInt(pe.eva):null;
+      if(eva!==null&&pEva!==null){
+        const d=eva-pEva;
+        const col=d<0?'var(--accent)':d>0?'var(--red)':'var(--muted)';
+        evaDiff=`<span style="font-size:11px;color:${col};font-weight:700;margin-left:4px">${d<0?'↓':d>0?'↑':'→'} EVA ${d>0?'+':''}${d}</span>`;
+      }
+    }
+
+    // Boutons de sélection pour comparaison manuelle
+    const isSelA = _compareIds[0]===e.id;
+    const isSelB = _compareIds[1]===e.id;
+    const selBtn = `<button class="ev-compare-btn${isSelA?' active':''}" onclick="setCompareId(0,'${e.id}')" title="Comparer comme référence récente">A</button>
+      <button class="ev-compare-btn${isSelB?' active':''}" onclick="setCompareId(1,'${e.id}')" title="Comparer comme référence ancienne">B</button>`;
+
+    // Champs verticaux
+    const fields = [];
+    if(eva!==null) fields.push({lbl:'🔴 Douleur EVA', val:`<span class="badge ${pc}">${eva}/10</span>`, isHtml:true});
+    if(e.mob)      fields.push({lbl:'📐 Mobilité',    val:e.mob});
+    if(e.force)    fields.push({lbl:'💪 Force',       val:e.force});
+    if(e.aut)      fields.push({lbl:'🔬 Tests',       val:e.aut});
+    if(e.nt)       fields.push({lbl:'📝 Notes',       val:e.nt, italic:true});
+
+    const fieldsHtml = fields.map(f=>
+      `<div class="ev-field">
+        <div class="ev-field-lbl">${f.lbl}</div>
+        <div class="ev-field-val${f.italic?' italic':''}">${f.isHtml?f.val:escNl(f.val)}</div>
+      </div>`
+    ).join('');
+
+    return `<div class="ev-card">
+      <div class="ev-card-hd">
+        <div class="ev-card-title">
+          ${fmtDate(e.date)}
+          <span class="ev-type-badge ${tm.cls}">${tm.lbl}</span>
+          ${evaDiff}
+        </div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <span style="font-size:10px;color:var(--muted);margin-right:3px">Comparer :</span>
+          ${selBtn}
+          <button class="btn btn-d btn-xs" onclick="confirmDeleteEval('${e.id}')" style="margin-left:4px">🗑</button>
+        </div>
+      </div>
+      <div class="ev-fields">${fieldsHtml||'<div style="padding:12px 16px;font-size:13px;color:var(--muted);font-style:italic">Aucune donnée saisie.</div>'}</div>
+    </div>`;
+  }).join('');
+}
+
+// Échapper le HTML et préserver les sauts de ligne
+function escNl(s) {
+  if(!s) return '';
+  var t = String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Si l'utilisateur a saisi des vrais sauts de ligne → les utiliser directement
+  if(t.indexOf('\n')>=0) return t.split('\n').join('<br>');
+  // Sinon : détection auto des séparateurs courants dans les données cliniques
+  // Splitter sur tirets longs
+  t = t.replace(/\s+[—–]\s+/g,'\n');
+  // Splitter sur chiffre+unité (sec,s,min,%,cm,°,kg) suivi d'une Majuscule (nouveau test)
+  t = t.replace(/(\d+(?:sec|min|kg|cm))\s+(?=[A-ZÀÁÂÉÈÊËÎÏÔÙÛÜ])/g,'$1\n');
+  t = t.replace(/(\d+(?:s|%|°))\s+(?=[A-ZÀÁÂÉÈÊËÎÏÔÙÛÜ][a-zàáâéèêëîïôùûü])/g,'$1\n');
+  // Splitter sur /5 /10 suivi d'espace+Majuscule (cotations musculaires)
+  t = t.replace(/(\/\d+)\s+(?=[A-ZÀÁÂÉÈÊËÎÏÔÙÛÜ][a-zàáâéèêëîïôùûü])/g,'$1\n');
+  return t.split('\n').join('<br>');
+}
+
+// Définir un élément de comparaison manuelle (0=A=récent, 1=B=ancien)
+function setCompareId(slot, id) {
+  // Si déjà sélectionné → désélectionner
+  if(_compareIds[slot]===id) { _compareIds[slot]=null; }
+  // Si l'autre slot a le même id → l'effacer
+  else { if(_compareIds[1-slot]===id) _compareIds[1-slot]=null; _compareIds[slot]=id; }
+  const p=getPt(); if(p) renderEvals(p);
+}
+
+// Rendu du panel de comparaison côte à côte
+function renderComparePanel(a, b, allEvals, isManual) {
+  const TYPE_MAP={'intermediaire':'Intermédiaire','bilan-final':'Bilan final','bilan-initial':'Bilan initial'};
+  const evaA=(a.eva!==''&&a.eva!==undefined)?parseInt(a.eva):null;
+  const evaB=(b.eva!==''&&b.eva!==undefined)?parseInt(b.eva):null;
+
+  // Comparer EVA : A est plus récent, amélioration = EVA plus bas
+  function evaCls(vA, vB) {
+    if(vA===null||vB===null) return 'neutral';
+    if(vA<vB) return 'better'; if(vA>vB) return 'worse'; return 'neutral';
+  }
+  // Pour texte libre : pas de comparaison automatique, juste affichage côte à côte
+  function txtRow(lbl, vA, vB) {
+    if(!vA&&!vB) return '';
+    return `<div class="ev-compare-row">
+      <div class="ev-compare-row-lbl">${lbl}</div>
+      <div class="ev-compare-cell">${vA?escNl(vA):'<span style="color:var(--muted);font-style:italic">—</span>'}</div>
+      <div class="ev-compare-cell">${vB?escNl(vB):'<span style="color:var(--muted);font-style:italic">—</span>'}</div>
+    </div>`;
+  }
+
+  const evaRow = (evaA!==null||evaB!==null) ? `<div class="ev-compare-row">
+    <div class="ev-compare-row-lbl">🔴 EVA</div>
+    <div class="ev-compare-cell ${evaCls(evaA,evaB)}">${evaA!==null?evaA+'/10':'—'}${evaA!==null&&evaB!==null&&evaA!==evaB?'<span style="font-size:11px;margin-left:6px">'+(evaA<evaB?'↓ +'+Math.abs(evaA-evaB):'↑ +'+Math.abs(evaA-evaB))+'</span>':''}</div>
+    <div class="ev-compare-cell ${evaCls(evaB,evaA)}">${evaB!==null?evaB+'/10':'—'}</div>
+  </div>` : '';
+
+  const rows = [
+    evaRow,
+    txtRow('📐 Mobilité', a.mob, b.mob),
+    txtRow('💪 Force', a.force, b.force),
+    txtRow('🔬 Tests', a.aut, b.aut),
+  ].filter(Boolean).join('');
+
+  const modeLabel = isManual
+    ? '<span style="font-size:11px;color:var(--accent);font-weight:500">Comparaison manuelle (A / B)</span>'
+    : '<span style="font-size:11px;color:var(--muted)">Comparaison automatique (2 dernières évaluations)</span>';
+
+  const resetBtn = isManual
+    ? `<button class="ev-compare-btn" onclick="resetCompare()" style="font-size:11px;padding:3px 9px">✕ Réinitialiser</button>`
+    : '';
+
+  return `<div class="ev-compare-panel">
+    <div class="ev-compare-panel-hd">
+      <div class="ev-compare-panel-title">⚖️ Comparaison d'évaluations</div>
+      <div style="display:flex;align-items:center;gap:8px">${modeLabel}${resetBtn}</div>
+    </div>
+    <div class="ev-compare-row" style="background:var(--bg)">
+      <div class="ev-compare-row-lbl" style="font-size:10px">ÉVALUATION</div>
+      <div class="ev-compare-date">${fmtDate(a.date)}<br><span style="font-size:10px;color:var(--muted)">${TYPE_MAP[a.type]||'—'}</span></div>
+      <div class="ev-compare-date">${fmtDate(b.date)}<br><span style="font-size:10px;color:var(--muted)">${TYPE_MAP[b.type]||'—'}</span></div>
+    </div>
+    ${rows||'<div style="padding:12px 16px;font-size:13px;color:var(--muted)">Aucune donnée commune à comparer.</div>'}
+  </div>`;
+}
+
+function resetCompare() {
+  _compareIds=[null,null];
+  const p=getPt(); if(p) renderEvals(p);
+}
+
+// ════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════
+function renderDash(p) {
+  const el=document.getElementById('dash-content');
+  const cycles=p.cycles||[], evals=p.evaluations||[];
+  const totalS=cycles.reduce((a,c)=>a+genSeances(c).length,0);
+  const doneS=cycles.reduce((a,c)=>a+genSeances(c).filter(d=>d<today()).length,0);
+  const latestEva=evals.length&&evals[0].eva!==''?evals[0].eva:null;
+  const initEva=p.bilan&&p.bilan.eva!==''&&p.bilan.eva!==undefined?p.bilan.eva:null;
+  const evaDiff=(latestEva!==null&&initEva!==null)?parseInt(latestEva)-parseInt(initEva):null;
+  const active=cycles.filter(c=>cycleProgress(c).status==='encours');
+  const pending=getPendingEvals(p.id);
+  const pctDone=totalS>0?Math.round((doneS/totalS)*100):0;
+
+  // SVG ring for sessions
+  const ringR=44, ringC=2*Math.PI*ringR, ringOff=ringC-(pctDone/100)*ringC;
+  const ringSVG=`<svg class="dc-ring" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="${ringR}" fill="none" stroke="var(--surface2)" stroke-width="7"/>
+    <circle cx="50" cy="50" r="${ringR}" fill="none" stroke="var(--accent)" stroke-width="7"
+      stroke-dasharray="${ringC}" stroke-dashoffset="${ringOff}"
+      stroke-linecap="round" transform="rotate(-90 50 50)"
+      style="transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)"/>
+    <text x="50" y="46" text-anchor="middle" class="dc-ring-text" fill="var(--text)" font-family="Fraunces,serif">${doneS}</text>
+    <text x="50" y="60" text-anchor="middle" fill="var(--muted)" font-size="10" font-weight="600" font-family="Inter,sans-serif">SUR ${totalS}</text>
+  </svg>`;
+
+  // EVA sparkline mini chart
+  let sparkSVG='';
+  if(evals.length>=2 && initEva!==null) {
+    const pts=[{v:parseInt(initEva)}];
+    const sortedEvals=[...evals].sort((a,b)=>a.date.localeCompare(b.date));
+    sortedEvals.forEach(e=>{if(e.eva!==''&&e.eva!==undefined) pts.push({v:parseInt(e.eva)});});
+    if(pts.length>=2){
+      const w=180,h=50,px=12,py=6;
+      const maxV=Math.max(...pts.map(p=>p.v),10);
+      const coords=pts.map((p,i)=>{
+        const x=px+i*((w-2*px)/(pts.length-1));
+        const y=py+(1-p.v/maxV)*(h-2*py);
+        return x+','+y;
+      });
+      sparkSVG=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block;margin-top:8px">
+        <polyline points="${coords.join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="${coords[coords.length-1].split(',')[0]}" cy="${coords[coords.length-1].split(',')[1]}" r="3" fill="var(--accent)"/>
+      </svg>`;
+    }
+  }
+
+  const improvePct = (initEva!==null&&latestEva!==null&&parseInt(initEva)>0)
+    ? Math.round(((parseInt(initEva)-parseInt(latestEva))/parseInt(initEva))*100) : null;
+
+  el.innerHTML=`
+  <div class="dash-grid">
+    ${evaDiff!==null?`<div class="dc dc-span2">
+      <div class="dc-lbl">Évolution douleur</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Visual Analog Scale (VAS)</div>
+      ${improvePct!==null&&improvePct>0?`<div style="position:absolute;top:22px;right:24px;font-size:12px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:4px">
+        <svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 17l-9.3-9.3a1 1 0 0 0-1.4 0L2 17"/></svg>
+        ${improvePct}% improvement
+      </div>`:''}
+      <div style="display:flex;align-items:flex-end;gap:16px;margin-top:12px">
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Initial</div>
+          <div style="font-family:Fraunces,serif;font-size:48px;font-weight:700;line-height:1;color:var(--text);letter-spacing:-2px">${String(initEva).padStart(2,'0')}</div>
+        </div>
+        <div style="font-size:20px;color:var(--muted);margin-bottom:10px">→</div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">Actuel</div>
+          <div style="font-family:Fraunces,serif;font-size:48px;font-weight:700;line-height:1;color:var(--accent);letter-spacing:-2px">${String(latestEva).padStart(2,'0')}</div>
+        </div>
+        <div style="flex:1">${sparkSVG}</div>
+      </div>
+    </div>`:`<div class="dc dc-span2">
+      <div class="dc-lbl">Évolution douleur</div>
+      <div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:16px">Saisir l'EVA dans le bilan et au moins une évaluation pour voir la progression.</div>
+    </div>`}
+    <div class="dc" style="text-align:center">
+      <div class="dc-lbl">Séances</div>
+      ${ringSVG}
+    </div>
+    <div class="dc">
+      <div class="dc-lbl">Cycles actifs</div>
+      <div class="dc-val">${String(active.length).padStart(2,'0')}</div>
+      <div class="dc-sub">${cycles.length} cycle(s) au total</div>
+    </div>
+    <div class="dc">
+      <div class="dc-lbl">Évaluations en attente</div>
+      <div class="dc-val${pending>0?' o':''}">${String(pending).padStart(2,'0')}</div>
+      ${pending>0?'<div style="margin-top:6px"><span class="badge badge-mid" style="font-size:10px">⚠ À réaliser</span></div>':'<div class="dc-sub">À jour ✓</div>'}
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:${active.length?'1fr 1fr':'1fr'};gap:16px;margin-bottom:20px">
+    ${active.length?`<div class="dc" style="margin-bottom:0">
+      <div class="dc-lbl">Progression</div>
+      <div style="margin-top:12px">
+      ${active.map(c=>{const prog=cycleProgress(c);return `<div style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${c.color||'var(--accent)'};display:inline-block"></span>${c.nom.length>30?c.nom.slice(0,30)+'...':c.nom}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--accent)">${prog.pct}%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="width:${prog.pct}%;background:${c.color||'var(--accent)'}"></div></div></div>`;}).join('')}
+      </div>
+    </div>`:''}
+    <div class="dc dc-dark" style="margin-bottom:0">
+      <div class="dc-lbl">Dernière note clinique</div>
+      ${p.bilan&&p.bilan.nt?`<div style="font-family:Fraunces,serif;font-size:15px;font-style:italic;line-height:1.7;color:rgba(255,255,255,.8);margin-top:10px">"${p.bilan.nt.length>200?p.bilan.nt.slice(0,200)+'...':p.bilan.nt}"</div>
+      <div style="margin-top:14px;display:flex;align-items:center;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">K</div>
+        <div><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7)">Kinésithérapeute</div></div>
+      </div>`:`<div style="font-size:13px;color:rgba(255,255,255,.35);font-style:italic;margin-top:10px">Aucune note enregistrée dans le bilan.</div>`}
+    </div>
+  </div>
+  ${p.bilan&&(p.bilan.diag||p.bilan.ol)?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    ${p.bilan.diag?`<div class="dc" style="margin-bottom:0">
+      <div class="dc-lbl" style="display:flex;align-items:center;gap:6px">
+        <svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+        Diagnostic
+      </div>
+      <div style="font-size:13.5px;line-height:1.7;margin-top:8px;color:var(--text)">${p.bilan.diag}</div>
+    </div>`:''}
+    ${p.bilan.ol?`<div class="dc" style="margin-bottom:0">
+      <div class="dc-lbl" style="display:flex;align-items:center;gap:6px">
+        <svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        Objectifs de rééducation
+      </div>
+      <div style="font-size:13.5px;line-height:1.7;margin-top:8px;color:var(--text)">${p.bilan.ol}</div>
+      ${p.bilan.oc?`<div style="font-size:12px;color:var(--muted);margin-top:6px"><strong style="color:var(--text)">Court terme :</strong> ${p.bilan.oc}</div>`:''}
+    </div>`:''}
+  </div>`:''}`;
+}
+
+// ════════════════════════════════
+// SETTINGS (modal)
+// ════════════════════════════════
+function openSettings() {
+  updateSettingsStats();
+  renderLibSettings();
+  updateStorageInfo();
+  openMo('mo-settings');
+}
+function updateStorageInfo() {
+  try {
+    const raw=localStorage.getItem(SK)||'';
+    const kb=(raw.length*2/1024).toFixed(1);
+    const pct=Math.min(100,Math.round((raw.length*2)/(5*1024*1024)*100));
+    const fill=document.getElementById('storage-fill');
+    fill.style.width=pct+'%';
+    fill.className='storage-fill'+(pct>80?' crit':pct>60?' warn':'');
+    document.getElementById('storage-label').textContent=kb+' Ko utilisés sur ~5 Mo ('+pct+'%)';
+  } catch(e) { document.getElementById('storage-label').textContent='Non disponible'; }
+}
+function updateSettingsStats() {
+  const nPts=db.patients.length;
+  const nCyc=db.patients.reduce((a,p)=>a+(p.cycles||[]).length,0);
+  const nEv=db.patients.reduce((a,p)=>a+(p.evaluations||[]).length,0);
+  document.getElementById('stats-patients').textContent=nPts;
+  document.getElementById('stats-cycles').textContent=nCyc;
+  document.getElementById('stats-evals').textContent=nEv;
+}
+function confirmReset() {
+  showConfirm('Réinitialiser toutes les données ?',
+    'Supprime définitivement les '+db.patients.length+' patient(s). Action irréversible. Exportez d\'abord une sauvegarde.',
+    ()=>{ db={patients:[],library:[...DEFAULT_LIB],version:31}; saveDB(); cpid=null;
+      document.getElementById('empty').style.display='flex';
+      document.getElementById('pv').style.display='none';
+      renderSB(); updateSettingsStats(); updateStorageInfo();
+      showToast('✓ Données réinitialisées'); },
+    'Tout supprimer','btn-d');
+}
+
+// ════════════════════════════════
+// PRINT
+// ════════════════════════════════
+function printPatient() {
+  document.querySelectorAll('.tab-p').forEach(p=>p.classList.add('on'));
+  window.print();
+  setTimeout(()=>{
+    document.querySelectorAll('.tab-p').forEach(p=>p.classList.remove('on'));
+    const active=document.querySelector('.tb.on');
+    const id=active?active.id.replace('t-',''):'bilan';
+    const panel=document.getElementById('p-'+id);
+    if(panel) panel.classList.add('on');
+  },600);
+}
+
+// ════════════════════════════════
+// KEYBOARD
+// ════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('confirm-overlay').classList.contains('open')) closeConfirm(false);
+    else closeMo();
+  }
+});
+
+// Cycle preview live update
+['cy-dur','cy-freq','cy-evf'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updateCyclePreview);
+});
+
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
+buildPS('b-ps','b-eva');
+renderSB();
+// Vérifier la connexion au serveur OneDrive au démarrage
+setTimeout(() => {
+  fetch(AUTOSAVE_URL, { method: 'OPTIONS' })
+    .then(() => { _autoSaveOk = true; updateAutoSaveIndicator(true); })
+    .catch(() => { _autoSaveOk = false; updateAutoSaveIndicator(false); });
+}, 1000);
+
+if (!db.patients.length) {
+  const demo = {
+    id: uid(), prenom: 'Marie', nom: 'Dupont', dob: '1989-04-15', patho: 'LCA droit', color: '#2E6B56',
+    bilan: { diag: 'Rupture LCA droit - Post-op J+45', deb: '2026-01-20',
+      ant: 'Aucun antécédent. Sportive (volleyball, 3x/sem).', eva: '3',
+      mob: 'Flexion 90°, extension complète', force: 'Testing quadriceps 3/5, ischio 4/5',
+      aut: 'Single leg stance : instabilité modérée',
+      oc: 'Récupérer la mobilité complète et marcher sans boiterie',
+      ol: 'Reprise du volleyball dans 6 mois', nt: 'Très motivée, bonne observance' },
+    cycles: [{ id: 'c1', nom: 'Cycle 1 – Renforcement initial', debut: '2026-01-20',
+      dur: 4, freq: 2, evf: 4, color: '#2E6B56',
+      obj: "Récupérer force et mobilité de base, diminuer l'œdème",
+      ctn: 'Vélo ergomètre, isométrique quadriceps, mobilisation passive, cryothérapie' }],
+    evaluations: [
+      { id: uid(), date: '2026-02-17', type: 'intermediaire', eva: '2', mob: 'Flexion 110°', force: 'Testing 4/5', aut: '', nt: 'Belle progression.' },
+      { id: uid(), date: '2026-01-20', type: 'bilan-initial', eva: '4', mob: 'Flexion 90°, extension -5°', force: 'Testing 2+/5', aut: 'Single leg squat impossible', nt: 'Post-op J+45.' }
+    ],
+    seances: { 'c1_0': { notes: "Bonne séance. Légère douleur en fin d'effort.", rpe: '5',
+      exos: [
+        { lib: 'Vélo ergomètre', series: '1', reps: '20 min', charge: '', tempo: '', recup: '', rpe: '3' },
+        { lib: 'Isométrique quadriceps', series: '3', reps: '10', charge: '', tempo: '5-0-5', recup: '60s', rpe: '4' }
+      ]}}
+  };
+  db.patients.push(demo);
+  saveDB();
+  renderSB();
+}
+</script>
+</body>
+</html>
