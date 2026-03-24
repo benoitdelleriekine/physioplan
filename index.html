@@ -949,10 +949,33 @@ const SUPABASE_URL = 'https://lkocfahrzwegndihepla.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxrb2NmYWhyendlZ25kaWhlcGxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODg3NzcsImV4cCI6MjA4OTc2NDc3N30.2sZiSyxw1QVnz8Gv99F48uBZOJAn-BMt-9PtUOLFEPc';
 const LOGIN_URL = 'login.html';
 let sb = null;
+let currentUser = null;
 try {
   const mod = window.supabase;
   if (mod && mod.createClient) sb = mod.createClient(SUPABASE_URL, SUPABASE_KEY);
 } catch(e) { console.warn('Supabase non disponible:', e); }
+
+// Vérifier la session au chargement — rediriger si pas connecté
+(async function checkAuth() {
+  if (!sb) return;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      window.location.href = LOGIN_URL;
+      return;
+    }
+    currentUser = session.user;
+    // Afficher l'email dans la sidebar
+    const indicator = document.getElementById('autosave-indicator');
+    if (indicator && currentUser) {
+      indicator.innerHTML = '👤 ' + currentUser.email;
+      indicator.style.color = 'rgba(255,255,255,.5)';
+      indicator.title = 'Connecté en tant que ' + currentUser.email;
+    }
+  } catch(e) {
+    console.warn('Erreur vérification session:', e);
+  }
+})();
 
 async function handleLogout() {
   if (!sb) { window.location.href = LOGIN_URL; return; }
