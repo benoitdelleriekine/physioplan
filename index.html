@@ -728,7 +728,11 @@ textarea{resize:vertical;min-height:76px;line-height:1.65}
       <div style="display:flex;align-items:center;gap:8px"><span id="mo-s-badge"></span><button class="mo-close" onclick="closeMo()">✕</button></div>
     </div>
     <div class="mo-bd">
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:9px;flex-wrap:wrap">
+      <div class="fg" style="margin-bottom:16px">
+        <label>Nom de la séance (optionnel)</label>
+        <input id="s-nom" placeholder="ex: Renforcement quadriceps, Proprioception, Reprise course…" autocomplete="off" style="font-size:15px;font-weight:600;padding:12px 14px">
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:10px 14px;background:#FAFAF8;border:1px solid var(--border);border-radius:9px;flex-wrap:wrap">
         <div style="font-size:12.5px;color:var(--muted);flex-shrink:0">📅 Date de la séance</div>
         <input type="date" id="s-date" style="width:160px;flex-shrink:0;font-size:13.5px;padding:7px 10px">
         <div style="font-size:12px;color:var(--muted);font-style:italic">Modifiez si la date ne correspond pas à votre planning réel.</div>
@@ -1513,10 +1517,11 @@ function cycleProgress(c) {
 }
 function genSeances(c) {
   const list=[], freq=Math.max(1,Math.min(7,parseInt(c.freq)||2)), dur=Math.max(1,parseInt(c.dur)||4);
-  const total=freq*dur, gap=7/freq, base=new Date(c.debut+'T00:00:00');
+  const total=freq*dur, gap=7/freq, base=new Date(c.debut+'T12:00:00');
   for (let i=0; i<total; i++) {
     const d=new Date(base); d.setDate(base.getDate()+Math.round(i*gap));
-    list.push(d.toISOString().slice(0,10));
+    const yy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
+    list.push(yy+'-'+mm+'-'+dd);
   }
   return list;
 }
@@ -1860,10 +1865,11 @@ function renderCycles(p) {
         return `<span class="fmt-badge ${cls}">${lbl}${tours}</span>`;
       }).filter((v,i,a)=>a.indexOf(v)===i).join('');
       const dateTag=dateModified?`<span class="tag" style="background:var(--gold-l);color:var(--gold);font-size:10px">✏️ modifiée</span>`:'';
+      const seanceNom = data.nom ? data.nom : '';
       return `<div class="seance-item${dispPast?' done':''}${isEval?' eval-due':''}${dispToday?' today-s':''}" onclick="openSeance('${c.id}',${i})">
         <div class="sn">${dispPast?'✓':dispToday?'▶':num}</div>
         <div class="s-date">${fmtDate(dispDate)}</div>
-        <div class="s-label">Séance ${num}${isEval?' — Évaluation prévue':''}</div>
+        <div class="s-label">Séance ${num}${seanceNom?' — '+seanceNom:''}${isEval&&!seanceNom?' — Évaluation prévue':''}</div>
         ${noteP}
         <div class="s-badges">${exoT}${fmtT}${rpeT}${dateTag}<span class="tag ${isEval?'tag-e':'tag-s'}">${isEval?'📊 Éval.':'Séance'}</span>${dispToday?'<span class="tag" style="background:var(--accent);color:#fff">Aujourd\'hui</span>':''}</div>
       </div>`;
@@ -1911,6 +1917,7 @@ function openSeance(cycleId, idx) {
   document.getElementById('mo-s-sub').textContent=(isEval?' 📊 Évaluation intermédiaire prévue':'');
   const badge=document.getElementById('mo-s-badge');
   badge.innerHTML=effToday?'<span class="badge badge-ok">Aujourd\'hui</span>':effPast?'<span class="badge badge-gray">Séance passée</span>':'<span class="badge badge-mid">À venir</span>';
+  document.getElementById('s-nom').value=sd.nom||'';
   document.getElementById('s-date').value=effectiveDate;
   document.getElementById('s-notes').value=sd.notes||'';
   buildRPE('s-rpe-bar','s-rpe');
@@ -2290,6 +2297,7 @@ function saveSeance() {
   // Ne stocker la date custom que si elle diffère de la date calculée
   const calcDate = genSeances(p.cycles.find(c=>c.id===cSeance.cycleId)||{})[cSeance.idx] || savedDate;
   p.seances[key].date  = (savedDate && savedDate !== calcDate) ? savedDate : undefined;
+  p.seances[key].nom   = document.getElementById('s-nom').value.trim() || undefined;
   p.seances[key].notes = document.getElementById('s-notes').value.trim();
   p.seances[key].rpe   = document.getElementById('s-rpe').value;
   saveDB(); closeMo(); renderCycles(p); renderCal(); showToast('✓ Séance enregistrée','ok');
@@ -2999,6 +3007,72 @@ function renderDash(p) {
       ${p.bilan.oc?`<div style="font-size:12px;color:var(--muted);margin-top:6px"><strong style="color:var(--text)">Court terme :</strong> ${p.bilan.oc}</div>`:''}
     </div>`:''}
   </div>`:''}`;
+
+  // ── Séance précédente & suivante ──
+  let prevSeance = null, nextSeance = null;
+  const todayStr = today();
+  const allSeances = [];
+  cycles.forEach(c => {
+    const dates = genSeances(c);
+    dates.forEach((date, i) => {
+      const key = c.id + '_' + i;
+      const sd = (p.seances||{})[key];
+      const sdM = sd ? (sd.exos !== undefined ? migrateSeanceData(sd) : sd) : null;
+      const effectiveDate = (sdM && sdM.date) || date;
+      allSeances.push({ date: effectiveDate, num: i+1, cycleName: c.nom, color: c.color||'var(--accent)', key, cycleId: c.id, idx: i, data: sdM });
+    });
+  });
+  allSeances.sort((a,b) => a.date.localeCompare(b.date));
+  // Précédente = dernière séance dont la date est < aujourd'hui (ou = aujourd'hui si données remplies)
+  for (let i = allSeances.length - 1; i >= 0; i--) {
+    if (allSeances[i].date < todayStr || (allSeances[i].date === todayStr && allSeances[i].data && allSeances[i].data.blocs && allSeances[i].data.blocs.length)) {
+      prevSeance = allSeances[i]; break;
+    }
+  }
+  // Suivante = première séance dont la date est >= aujourd'hui et pas encore remplie (ou simplement la prochaine)
+  for (let i = 0; i < allSeances.length; i++) {
+    if (allSeances[i].date >= todayStr) {
+      if (allSeances[i].date === todayStr && prevSeance && prevSeance.key === allSeances[i].key) continue;
+      nextSeance = allSeances[i]; break;
+    }
+  }
+
+  function renderSeanceCard(s, label, icon) {
+    if (!s) return '<div class="dc" style="margin-bottom:0"><div class="dc-lbl">' + icon + ' ' + label + '</div><div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:12px">Aucune ' + label.toLowerCase() + ' trouvée.</div></div>';
+    const d = s.data;
+    const blocs = d && d.blocs || [];
+    const totalExos = blocs.reduce((a,b) => a + (b.exos||[]).length, 0);
+    const exoList = blocs.flatMap(b => (b.exos||[]).map(e => e.lib)).filter(Boolean).slice(0, 5);
+    const nomSeance = d && d.nom ? d.nom : '';
+    const rpe = d && d.rpe !== undefined && d.rpe !== '' ? d.rpe : null;
+    const notes = d && d.notes ? d.notes : '';
+    return '<div class="dc" style="margin-bottom:0;cursor:pointer" onclick="openSeance(\x27' + s.cycleId + '\x27,' + s.idx + ')">' +
+      '<div class="dc-lbl" style="display:flex;align-items:center;justify-content:space-between">' +
+        '<span>' + icon + ' ' + label + '</span>' +
+        '<span style="font-size:11px;font-weight:500;color:var(--accent)">' + fmtDate(s.date) + '</span>' +
+      '</div>' +
+      '<div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+        '<span style="font-size:14px;font-weight:600;color:var(--text)">S\u00e9ance ' + s.num + (nomSeance ? ' — ' + nomSeance : '') + '</span>' +
+        '<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:' + s.color + '22;color:' + s.color + ';font-weight:600">' + s.cycleName + '</span>' +
+      '</div>' +
+      (totalExos > 0 ?
+        '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">' +
+          exoList.map(function(e) { return '<span style="font-size:11px;padding:3px 8px;background:#FAFAF8;border:1px solid var(--border);border-radius:6px;color:var(--text);font-weight:500">' + e + '</span>'; }).join('') +
+          (totalExos > 5 ? '<span style="font-size:11px;padding:3px 8px;color:var(--muted);font-weight:500">+' + (totalExos - 5) + ' autres</span>' : '') +
+        '</div>' : '<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:8px">Aucun exercice renseign\u00e9</div>'
+      ) +
+      (rpe !== null ? '<div style="margin-top:8px"><span class="badge badge-gray" style="font-size:10px">RPE ' + rpe + '</span></div>' : '') +
+      (notes ? '<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + notes.slice(0, 80) + (notes.length > 80 ? '\u2026' : '') + '</div>' : '') +
+    '</div>';
+  }
+
+  const seanceCardsHtml = (prevSeance || nextSeance) ?
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">' +
+      renderSeanceCard(prevSeance, 'Derni\u00e8re s\u00e9ance', '\u25C0') +
+      renderSeanceCard(nextSeance, 'Prochaine s\u00e9ance', '\u25B6') +
+    '</div>' : '';
+
+  el.innerHTML += seanceCardsHtml;
 }
 
 // ════════════════════════════════
