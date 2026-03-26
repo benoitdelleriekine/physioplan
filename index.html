@@ -728,11 +728,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.65}
       <div style="display:flex;align-items:center;gap:8px"><span id="mo-s-badge"></span><button class="mo-close" onclick="closeMo()">✕</button></div>
     </div>
     <div class="mo-bd">
-      <div class="fg" style="margin-bottom:16px">
-        <label>Nom de la séance (optionnel)</label>
-        <input id="s-nom" placeholder="ex: Renforcement quadriceps, Proprioception, Reprise course…" autocomplete="off" style="font-size:15px;font-weight:600;padding:12px 14px">
-      </div>
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:10px 14px;background:#FAFAF8;border:1px solid var(--border);border-radius:9px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:9px;flex-wrap:wrap">
         <div style="font-size:12.5px;color:var(--muted);flex-shrink:0">📅 Date de la séance</div>
         <input type="date" id="s-date" style="width:160px;flex-shrink:0;font-size:13.5px;padding:7px 10px">
         <div style="font-size:12px;color:var(--muted);font-style:italic">Modifiez si la date ne correspond pas à votre planning réel.</div>
@@ -1517,11 +1513,10 @@ function cycleProgress(c) {
 }
 function genSeances(c) {
   const list=[], freq=Math.max(1,Math.min(7,parseInt(c.freq)||2)), dur=Math.max(1,parseInt(c.dur)||4);
-  const total=freq*dur, gap=7/freq, base=new Date(c.debut+'T12:00:00');
+  const total=freq*dur, gap=7/freq, base=new Date(c.debut+'T00:00:00');
   for (let i=0; i<total; i++) {
     const d=new Date(base); d.setDate(base.getDate()+Math.round(i*gap));
-    const yy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
-    list.push(yy+'-'+mm+'-'+dd);
+    list.push(d.toISOString().slice(0,10));
   }
   return list;
 }
@@ -1865,11 +1860,10 @@ function renderCycles(p) {
         return `<span class="fmt-badge ${cls}">${lbl}${tours}</span>`;
       }).filter((v,i,a)=>a.indexOf(v)===i).join('');
       const dateTag=dateModified?`<span class="tag" style="background:var(--gold-l);color:var(--gold);font-size:10px">✏️ modifiée</span>`:'';
-      const seanceNom = data.nom ? data.nom : '';
       return `<div class="seance-item${dispPast?' done':''}${isEval?' eval-due':''}${dispToday?' today-s':''}" onclick="openSeance('${c.id}',${i})">
         <div class="sn">${dispPast?'✓':dispToday?'▶':num}</div>
         <div class="s-date">${fmtDate(dispDate)}</div>
-        <div class="s-label">Séance ${num}${seanceNom?' — '+seanceNom:''}${isEval&&!seanceNom?' — Évaluation prévue':''}</div>
+        <div class="s-label">Séance ${num}${isEval?' — Évaluation prévue':''}</div>
         ${noteP}
         <div class="s-badges">${exoT}${fmtT}${rpeT}${dateTag}<span class="tag ${isEval?'tag-e':'tag-s'}">${isEval?'📊 Éval.':'Séance'}</span>${dispToday?'<span class="tag" style="background:var(--accent);color:#fff">Aujourd\'hui</span>':''}</div>
       </div>`;
@@ -1917,7 +1911,6 @@ function openSeance(cycleId, idx) {
   document.getElementById('mo-s-sub').textContent=(isEval?' 📊 Évaluation intermédiaire prévue':'');
   const badge=document.getElementById('mo-s-badge');
   badge.innerHTML=effToday?'<span class="badge badge-ok">Aujourd\'hui</span>':effPast?'<span class="badge badge-gray">Séance passée</span>':'<span class="badge badge-mid">À venir</span>';
-  document.getElementById('s-nom').value=sd.nom||'';
   document.getElementById('s-date').value=effectiveDate;
   document.getElementById('s-notes').value=sd.notes||'';
   buildRPE('s-rpe-bar','s-rpe');
@@ -2297,7 +2290,6 @@ function saveSeance() {
   // Ne stocker la date custom que si elle diffère de la date calculée
   const calcDate = genSeances(p.cycles.find(c=>c.id===cSeance.cycleId)||{})[cSeance.idx] || savedDate;
   p.seances[key].date  = (savedDate && savedDate !== calcDate) ? savedDate : undefined;
-  p.seances[key].nom   = document.getElementById('s-nom').value.trim() || undefined;
   p.seances[key].notes = document.getElementById('s-notes').value.trim();
   p.seances[key].rpe   = document.getElementById('s-rpe').value;
   saveDB(); closeMo(); renderCycles(p); renderCal(); showToast('✓ Séance enregistrée','ok');
@@ -2893,186 +2885,187 @@ function renderDash(p) {
   const active=cycles.filter(c=>cycleProgress(c).status==='encours');
   const pending=getPendingEvals(p.id);
   const pctDone=totalS>0?Math.round((doneS/totalS)*100):0;
+  const todayStr=today();
 
-  // SVG ring for sessions
-  const ringR=44, ringC=2*Math.PI*ringR, ringOff=ringC-(pctDone/100)*ringC;
-  const ringSVG=`<svg class="dc-ring" viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="${ringR}" fill="none" stroke="var(--surface2)" stroke-width="7"/>
-    <circle cx="50" cy="50" r="${ringR}" fill="none" stroke="var(--accent)" stroke-width="7"
-      stroke-dasharray="${ringC}" stroke-dashoffset="${ringOff}"
-      stroke-linecap="round" transform="rotate(-90 50 50)"
-      style="transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)"/>
-    <text x="50" y="46" text-anchor="middle" class="dc-ring-text" fill="var(--text)" font-family="Fraunces,serif">${doneS}</text>
-    <text x="50" y="60" text-anchor="middle" fill="var(--muted)" font-size="10" font-weight="600" font-family="Inter,sans-serif">SUR ${totalS}</text>
-  </svg>`;
-
-  // EVA sparkline mini chart
-  let sparkSVG='';
-  if(evals.length>=2 && initEva!==null) {
-    const pts=[{v:parseInt(initEva)}];
-    const sortedEvals=[...evals].sort((a,b)=>a.date.localeCompare(b.date));
-    sortedEvals.forEach(e=>{if(e.eva!==''&&e.eva!==undefined) pts.push({v:parseInt(e.eva)});});
-    if(pts.length>=2){
-      const w=180,h=50,px=12,py=6;
-      const maxV=Math.max(...pts.map(p=>p.v),10);
-      const coords=pts.map((p,i)=>{
-        const x=px+i*((w-2*px)/(pts.length-1));
-        const y=py+(1-p.v/maxV)*(h-2*py);
-        return x+','+y;
-      });
-      sparkSVG=`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="display:block;margin-top:8px">
-        <polyline points="${coords.join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="${coords[coords.length-1].split(',')[0]}" cy="${coords[coords.length-1].split(',')[1]}" r="3" fill="var(--accent)"/>
-      </svg>`;
-    }
-  }
-
-  const improvePct = (initEva!==null&&latestEva!==null&&parseInt(initEva)>0)
-    ? Math.round(((parseInt(initEva)-parseInt(latestEva))/parseInt(initEva))*100) : null;
-
-  el.innerHTML=`
-  <div class="dash-grid">
-    ${evaDiff!==null?`<div class="dc dc-span2">
-      <div class="dc-lbl">Évolution douleur</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:2px">Visual Analog Scale (VAS)</div>
-      ${improvePct!==null&&improvePct>0?`<div style="position:absolute;top:22px;right:24px;font-size:12px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:4px">
-        <svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 17l-9.3-9.3a1 1 0 0 0-1.4 0L2 17"/></svg>
-        ${improvePct}% improvement
-      </div>`:''}
-      <div style="display:flex;align-items:flex-end;gap:16px;margin-top:12px">
-        <div>
-          <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Initial</div>
-          <div style="font-family:Fraunces,serif;font-size:48px;font-weight:700;line-height:1;color:var(--text);letter-spacing:-2px">${String(initEva).padStart(2,'0')}</div>
-        </div>
-        <div style="font-size:20px;color:var(--muted);margin-bottom:10px">→</div>
-        <div>
-          <div style="font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">Actuel</div>
-          <div style="font-family:Fraunces,serif;font-size:48px;font-weight:700;line-height:1;color:var(--accent);letter-spacing:-2px">${String(latestEva).padStart(2,'0')}</div>
-        </div>
-        <div style="flex:1">${sparkSVG}</div>
-      </div>
-    </div>`:`<div class="dc dc-span2">
-      <div class="dc-lbl">Évolution douleur</div>
-      <div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:16px">Saisir l'EVA dans le bilan et au moins une évaluation pour voir la progression.</div>
-    </div>`}
-    <div class="dc" style="text-align:center">
-      <div class="dc-lbl">Séances</div>
-      ${ringSVG}
-    </div>
-    <div class="dc">
-      <div class="dc-lbl">Cycles actifs</div>
-      <div class="dc-val">${String(active.length).padStart(2,'0')}</div>
-      <div class="dc-sub">${cycles.length} cycle(s) au total</div>
-    </div>
-    <div class="dc">
-      <div class="dc-lbl">Évaluations en attente</div>
-      <div class="dc-val${pending>0?' o':''}">${String(pending).padStart(2,'0')}</div>
-      ${pending>0?'<div style="margin-top:6px"><span class="badge badge-mid" style="font-size:10px">⚠ À réaliser</span></div>':'<div class="dc-sub">À jour ✓</div>'}
-    </div>
-  </div>
-  <div style="display:grid;grid-template-columns:${active.length?'1fr 1fr':'1fr'};gap:16px;margin-bottom:20px">
-    ${active.length?`<div class="dc" style="margin-bottom:0">
-      <div class="dc-lbl">Progression</div>
-      <div style="margin-top:12px">
-      ${active.map(c=>{const prog=cycleProgress(c);return `<div style="margin-bottom:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <span style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:${c.color||'var(--accent)'};display:inline-block"></span>${c.nom.length>30?c.nom.slice(0,30)+'...':c.nom}</span>
-          <span style="font-size:12px;font-weight:700;color:var(--accent)">${prog.pct}%</span></div>
-        <div class="prog-track"><div class="prog-fill" style="width:${prog.pct}%;background:${c.color||'var(--accent)'}"></div></div></div>`;}).join('')}
-      </div>
-    </div>`:''}
-    <div class="dc dc-dark" style="margin-bottom:0">
-      <div class="dc-lbl">Dernière note clinique</div>
-      ${p.bilan&&p.bilan.nt?`<div style="font-family:Fraunces,serif;font-size:15px;font-style:italic;line-height:1.7;color:rgba(255,255,255,.8);margin-top:10px">"${p.bilan.nt.length>200?p.bilan.nt.slice(0,200)+'...':p.bilan.nt}"</div>
-      <div style="margin-top:14px;display:flex;align-items:center;gap:8px">
-        <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">K</div>
-        <div><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7)">Kinésithérapeute</div></div>
-      </div>`:`<div style="font-size:13px;color:rgba(255,255,255,.35);font-style:italic;margin-top:10px">Aucune note enregistrée dans le bilan.</div>`}
-    </div>
-  </div>
-  ${p.bilan&&(p.bilan.diag||p.bilan.ol)?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-    ${p.bilan.diag?`<div class="dc" style="margin-bottom:0">
-      <div class="dc-lbl" style="display:flex;align-items:center;gap:6px">
-        <svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
-        Diagnostic
-      </div>
-      <div style="font-size:13.5px;line-height:1.7;margin-top:8px;color:var(--text)">${p.bilan.diag}</div>
-    </div>`:''}
-    ${p.bilan.ol?`<div class="dc" style="margin-bottom:0">
-      <div class="dc-lbl" style="display:flex;align-items:center;gap:6px">
-        <svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-        Objectifs de rééducation
-      </div>
-      <div style="font-size:13.5px;line-height:1.7;margin-top:8px;color:var(--text)">${p.bilan.ol}</div>
-      ${p.bilan.oc?`<div style="font-size:12px;color:var(--muted);margin-top:6px"><strong style="color:var(--text)">Court terme :</strong> ${p.bilan.oc}</div>`:''}
-    </div>`:''}
-  </div>`:''}`;
-
-  // ── Séance précédente & suivante ──
-  let prevSeance = null, nextSeance = null;
-  const todayStr = today();
-  const allSeances = [];
-  cycles.forEach(c => {
-    const dates = genSeances(c);
-    dates.forEach((date, i) => {
-      const key = c.id + '_' + i;
-      const sd = (p.seances||{})[key];
-      const sdM = sd ? (sd.exos !== undefined ? migrateSeanceData(sd) : sd) : null;
-      const effectiveDate = (sdM && sdM.date) || date;
-      allSeances.push({ date: effectiveDate, num: i+1, cycleName: c.nom, color: c.color||'var(--accent)', key, cycleId: c.id, idx: i, data: sdM });
+  // ── Calcul séance précédente & suivante ──
+  var prevS=null, nextS=null;
+  var allS=[];
+  cycles.forEach(function(c){
+    var dates=genSeances(c);
+    dates.forEach(function(date,i){
+      var key=c.id+'_'+i;
+      var sd=(p.seances||{})[key];
+      var sdM=sd?(sd.exos!==undefined?migrateSeanceData(sd):sd):null;
+      var effDate=(sdM&&sdM.date)||date;
+      allS.push({date:effDate,num:i+1,cName:c.nom,color:c.color||'var(--accent)',key:key,cId:c.id,idx:i,d:sdM});
     });
   });
-  allSeances.sort((a,b) => a.date.localeCompare(b.date));
-  // Précédente = dernière séance dont la date est < aujourd'hui (ou = aujourd'hui si données remplies)
-  for (let i = allSeances.length - 1; i >= 0; i--) {
-    if (allSeances[i].date < todayStr || (allSeances[i].date === todayStr && allSeances[i].data && allSeances[i].data.blocs && allSeances[i].data.blocs.length)) {
-      prevSeance = allSeances[i]; break;
+  allS.sort(function(a,b){return a.date.localeCompare(b.date);});
+  for(var i=allS.length-1;i>=0;i--){
+    if(allS[i].date<todayStr||(allS[i].date===todayStr&&allS[i].d&&allS[i].d.blocs&&allS[i].d.blocs.length)){
+      prevS=allS[i]; break;
     }
   }
-  // Suivante = première séance dont la date est >= aujourd'hui et pas encore remplie (ou simplement la prochaine)
-  for (let i = 0; i < allSeances.length; i++) {
-    if (allSeances[i].date >= todayStr) {
-      if (allSeances[i].date === todayStr && prevSeance && prevSeance.key === allSeances[i].key) continue;
-      nextSeance = allSeances[i]; break;
+  for(var i=0;i<allS.length;i++){
+    if(allS[i].date>=todayStr){
+      if(allS[i].date===todayStr&&prevS&&prevS.key===allS[i].key) continue;
+      nextS=allS[i]; break;
     }
   }
 
-  function renderSeanceCard(s, label, icon) {
-    if (!s) return '<div class="dc" style="margin-bottom:0"><div class="dc-lbl">' + icon + ' ' + label + '</div><div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:12px">Aucune ' + label.toLowerCase() + ' trouvée.</div></div>';
-    const d = s.data;
-    const blocs = d && d.blocs || [];
-    const totalExos = blocs.reduce((a,b) => a + (b.exos||[]).length, 0);
-    const exoList = blocs.flatMap(b => (b.exos||[]).map(e => e.lib)).filter(Boolean).slice(0, 5);
-    const nomSeance = d && d.nom ? d.nom : '';
-    const rpe = d && d.rpe !== undefined && d.rpe !== '' ? d.rpe : null;
-    const notes = d && d.notes ? d.notes : '';
-    return '<div class="dc" style="margin-bottom:0;cursor:pointer" onclick="openSeance(\x27' + s.cycleId + '\x27,' + s.idx + ')">' +
-      '<div class="dc-lbl" style="display:flex;align-items:center;justify-content:space-between">' +
-        '<span>' + icon + ' ' + label + '</span>' +
-        '<span style="font-size:11px;font-weight:500;color:var(--accent)">' + fmtDate(s.date) + '</span>' +
-      '</div>' +
-      '<div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
-        '<span style="font-size:14px;font-weight:600;color:var(--text)">S\u00e9ance ' + s.num + (nomSeance ? ' — ' + nomSeance : '') + '</span>' +
-        '<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:' + s.color + '22;color:' + s.color + ';font-weight:600">' + s.cycleName + '</span>' +
-      '</div>' +
-      (totalExos > 0 ?
-        '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">' +
-          exoList.map(function(e) { return '<span style="font-size:11px;padding:3px 8px;background:#FAFAF8;border:1px solid var(--border);border-radius:6px;color:var(--text);font-weight:500">' + e + '</span>'; }).join('') +
-          (totalExos > 5 ? '<span style="font-size:11px;padding:3px 8px;color:var(--muted);font-weight:500">+' + (totalExos - 5) + ' autres</span>' : '') +
-        '</div>' : '<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:8px">Aucun exercice renseign\u00e9</div>'
-      ) +
-      (rpe !== null ? '<div style="margin-top:8px"><span class="badge badge-gray" style="font-size:10px">RPE ' + rpe + '</span></div>' : '') +
-      (notes ? '<div style="font-size:12px;color:var(--muted);font-style:italic;margin-top:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + notes.slice(0, 80) + (notes.length > 80 ? '\u2026' : '') + '</div>' : '') +
+  function seanceCard(s,label,isNext){
+    if(!s) return '<div class="dc" style="margin-bottom:0;min-height:120px"><div class="dc-lbl">'+label+'</div><div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:16px">Aucune s\u00e9ance trouv\u00e9e.</div></div>';
+    var d=s.d, blocs=d&&d.blocs||[], totExos=blocs.reduce(function(a,b){return a+(b.exos||[]).length;},0);
+    var exoList=blocs.flatMap(function(b){return(b.exos||[]).map(function(e){return e.lib;});}).filter(Boolean).slice(0,5);
+    var nom=d&&d.nom?d.nom:'';
+    var rpe=d&&d.rpe!==undefined&&d.rpe!==''?d.rpe:null;
+    var notes=d&&d.notes?d.notes:'';
+    var borderCol=isNext?'var(--accent)':'var(--border)';
+    var bgHint=isNext?'rgba(46,107,86,.03)':'transparent';
+    return '<div class="dc" style="margin-bottom:0;cursor:pointer;border-color:'+borderCol+';background:'+bgHint+'" onclick="openSeance(\''+s.cId+'\','+s.idx+')">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
+        '<div class="dc-lbl" style="margin-bottom:0">'+label+'</div>'+
+        '<span style="font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-l);padding:3px 10px;border-radius:20px">'+fmtDate(s.date)+'</span>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+
+        '<span style="font-family:Fraunces,serif;font-size:18px;font-weight:600;color:var(--text)">S\u00e9ance '+s.num+(nom?' \u2014 '+nom:'')+'</span>'+
+      '</div>'+
+      '<div style="display:inline-flex;align-items:center;gap:4px;margin-bottom:10px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:'+s.color+';display:inline-block"></span>'+
+        '<span style="font-size:11px;font-weight:600;color:var(--muted)">'+s.cName+'</span>'+
+      '</div>'+
+      (totExos>0?
+        '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">'+
+          exoList.map(function(e){return '<span style="font-size:11px;padding:3px 9px;background:#FAFAF8;border:1px solid var(--border);border-radius:6px;font-weight:500">'+e+'</span>';}).join('')+
+          (totExos>5?'<span style="font-size:11px;padding:3px 9px;color:var(--muted)">+'+(totExos-5)+' autres</span>':'')+
+        '</div>':'<div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:6px">Aucun exercice renseign\u00e9</div>')+
+      '<div style="display:flex;gap:8px;align-items:center;margin-top:4px">'+
+        (rpe!==null?'<span class="badge badge-gray" style="font-size:10px">RPE '+rpe+'</span>':'')+
+        (notes?'<span style="font-size:11px;color:var(--muted);font-style:italic;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:200px">'+notes.slice(0,60)+(notes.length>60?'\u2026':'')+'</span>':'')+
+      '</div>'+
     '</div>';
   }
 
-  const seanceCardsHtml = (prevSeance || nextSeance) ?
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px">' +
-      renderSeanceCard(prevSeance, 'Derni\u00e8re s\u00e9ance', '\u25C0') +
-      renderSeanceCard(nextSeance, 'Prochaine s\u00e9ance', '\u25B6') +
-    '</div>' : '';
+  // ── SVG ring ──
+  var ringR=40, ringC=2*Math.PI*ringR, ringOff=ringC-(pctDone/100)*ringC;
+  var ringSVG='<svg class="dc-ring" viewBox="0 0 100 100" style="width:90px;height:90px;margin:4px auto 4px">'+
+    '<circle cx="50" cy="50" r="'+ringR+'" fill="none" stroke="var(--surface2)" stroke-width="6"/>'+
+    '<circle cx="50" cy="50" r="'+ringR+'" fill="none" stroke="var(--accent)" stroke-width="6" stroke-dasharray="'+ringC+'" stroke-dashoffset="'+ringOff+'" stroke-linecap="round" transform="rotate(-90 50 50)" style="transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)"/>'+
+    '<text x="50" y="46" text-anchor="middle" fill="var(--text)" font-family="Fraunces,serif" font-size="22" font-weight="700">'+doneS+'</text>'+
+    '<text x="50" y="62" text-anchor="middle" fill="var(--muted)" font-size="9" font-weight="600" font-family="Inter,sans-serif">SUR '+totalS+'</text>'+
+  '</svg>';
 
-  el.innerHTML += seanceCardsHtml;
+  // ── EVA sparkline ──
+  var sparkSVG='';
+  if(evals.length>=2 && initEva!==null) {
+    var pts=[{v:parseInt(initEva)}];
+    var sortedEvals=[...evals].sort(function(a,b){return a.date.localeCompare(b.date);});
+    sortedEvals.forEach(function(e){if(e.eva!==''&&e.eva!==undefined) pts.push({v:parseInt(e.eva)});});
+    if(pts.length>=2){
+      var w=160,h=45,px=10,py=5;
+      var maxV=Math.max.apply(null,pts.map(function(p){return p.v;}).concat([10]));
+      var coords=pts.map(function(pt,i){
+        var x=px+i*((w-2*px)/(pts.length-1));
+        var y=py+(1-pt.v/maxV)*(h-2*py);
+        return x+','+y;
+      });
+      sparkSVG='<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" style="display:block;margin-top:6px">'+
+        '<polyline points="'+coords.join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
+        '<circle cx="'+coords[coords.length-1].split(',')[0]+'" cy="'+coords[coords.length-1].split(',')[1]+'" r="3" fill="var(--accent)"/>'+
+      '</svg>';
+    }
+  }
+
+  var improvePct=(initEva!==null&&latestEva!==null&&parseInt(initEva)>0)?Math.round(((parseInt(initEva)-parseInt(latestEva))/parseInt(initEva))*100):null;
+
+  // ══════════════════════════════════
+  // ASSEMBLAGE HTML — disposition clinique
+  // ══════════════════════════════════
+  var html = '';
+
+  // ── LIGNE 1 : Diagnostic + Objectifs (contexte patient) ──
+  if(p.bilan&&(p.bilan.diag||p.bilan.ol)) {
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">';
+    if(p.bilan.diag) {
+      html += '<div class="dc" style="margin-bottom:0"><div class="dc-lbl" style="display:flex;align-items:center;gap:6px">';
+      html += '<svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>';
+      html += 'Diagnostic</div><div style="font-size:13.5px;line-height:1.7;margin-top:8px">'+p.bilan.diag+'</div></div>';
+    }
+    if(p.bilan.ol) {
+      html += '<div class="dc" style="margin-bottom:0"><div class="dc-lbl" style="display:flex;align-items:center;gap:6px">';
+      html += '<svg width="14" height="14" fill="none" stroke="var(--muted)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>';
+      html += 'Objectifs</div><div style="font-size:13.5px;line-height:1.7;margin-top:8px">'+p.bilan.ol+'</div>';
+      if(p.bilan.oc) html += '<div style="font-size:12px;color:var(--muted);margin-top:6px"><strong style="color:var(--text)">Court terme :</strong> '+p.bilan.oc+'</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  // ── LIGNE 2 : Séances prev/next ──
+  if(prevS || nextS) {
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">';
+    html += seanceCard(prevS,'\u25C0 Derni\u00e8re s\u00e9ance',false);
+    html += seanceCard(nextS,'\u25B6 Prochaine s\u00e9ance',true);
+    html += '</div>';
+  }
+
+  // ── LIGNE 3 : EVA (2col) + Séances ring (1col) + Évals (1col) ──
+  html += '<div class="dash-grid" style="margin-bottom:20px">';
+  if(evaDiff!==null) {
+    html += '<div class="dc dc-span2">';
+    html += '<div class="dc-lbl">\u00c9volution douleur</div>';
+    html += '<div style="font-size:10px;color:var(--muted);margin-bottom:2px">Visual Analog Scale (VAS)</div>';
+    if(improvePct!==null&&improvePct>0) {
+      html += '<div style="position:absolute;top:22px;right:24px;font-size:12px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:4px">';
+      html += '<svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 17l-9.3-9.3a1 1 0 0 0-1.4 0L2 17"/></svg>';
+      html += improvePct+'% am\u00e9lioration</div>';
+    }
+    html += '<div style="display:flex;align-items:flex-end;gap:16px;margin-top:10px">';
+    html += '<div><div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Initial</div>';
+    html += '<div style="font-family:Fraunces,serif;font-size:42px;font-weight:700;line-height:1;color:var(--text);letter-spacing:-2px">'+String(initEva).padStart(2,'0')+'</div></div>';
+    html += '<div style="font-size:18px;color:var(--muted);margin-bottom:8px">\u2192</div>';
+    html += '<div><div style="font-size:10px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.5px">Actuel</div>';
+    html += '<div style="font-family:Fraunces,serif;font-size:42px;font-weight:700;line-height:1;color:var(--accent);letter-spacing:-2px">'+String(latestEva).padStart(2,'0')+'</div></div>';
+    html += '<div style="flex:1">'+sparkSVG+'</div>';
+    html += '</div></div>';
+  } else {
+    html += '<div class="dc dc-span2"><div class="dc-lbl">\u00c9volution douleur</div>';
+    html += '<div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:16px">Saisir l\'EVA dans le bilan et au moins une \u00e9valuation pour voir la progression.</div></div>';
+  }
+  html += '<div class="dc" style="text-align:center"><div class="dc-lbl">S\u00e9ances</div>'+ringSVG+'</div>';
+  html += '<div class="dc"><div class="dc-lbl">\u00c9valuations en attente</div>';
+  html += '<div class="dc-val'+(pending>0?' o':'')+'">'+String(pending).padStart(2,'0')+'</div>';
+  html += (pending>0?'<div style="margin-top:6px"><span class="badge badge-mid" style="font-size:10px">\u26a0 \u00c0 r\u00e9aliser</span></div>':'<div class="dc-sub">\u00c0 jour \u2713</div>');
+  html += '</div></div>';
+
+  // ── LIGNE 4 : Progression cycles + Note clinique ──
+  if(active.length || (p.bilan&&p.bilan.nt)) {
+    html += '<div style="display:grid;grid-template-columns:'+(active.length?'1fr 1fr':'1fr')+';gap:16px;margin-bottom:20px">';
+    if(active.length) {
+      html += '<div class="dc" style="margin-bottom:0"><div class="dc-lbl">Progression des cycles</div><div style="margin-top:12px">';
+      active.forEach(function(c){
+        var prog=cycleProgress(c);
+        html += '<div style="margin-bottom:14px">';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
+        html += '<span style="font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:'+(c.color||'var(--accent)')+';display:inline-block"></span>'+(c.nom.length>30?c.nom.slice(0,30)+'...':c.nom)+'</span>';
+        html += '<span style="font-size:12px;font-weight:700;color:var(--accent)">'+prog.pct+'%</span></div>';
+        html += '<div class="prog-track"><div class="prog-fill" style="width:'+prog.pct+'%;background:'+(c.color||'var(--accent)')+'"></div></div></div>';
+      });
+      html += '</div></div>';
+    }
+    html += '<div class="dc dc-dark" style="margin-bottom:0"><div class="dc-lbl">Derni\u00e8re note clinique</div>';
+    if(p.bilan&&p.bilan.nt) {
+      html += '<div style="font-family:Fraunces,serif;font-size:14px;font-style:italic;line-height:1.7;color:rgba(255,255,255,.8);margin-top:10px">\u201c'+(p.bilan.nt.length>180?p.bilan.nt.slice(0,180)+'...':p.bilan.nt)+'\u201d</div>';
+      html += '<div style="margin-top:12px;display:flex;align-items:center;gap:8px">';
+      html += '<div style="width:26px;height:26px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">K</div>';
+      html += '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.6)">Kin\u00e9sith\u00e9rapeute</div></div>';
+    } else {
+      html += '<div style="font-size:13px;color:rgba(255,255,255,.35);font-style:italic;margin-top:10px">Aucune note enregistr\u00e9e.</div>';
+    }
+    html += '</div></div>';
+  }
+
+  el.innerHTML = html;
 }
 
 // ════════════════════════════════
