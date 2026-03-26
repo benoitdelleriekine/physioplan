@@ -1116,6 +1116,72 @@ async function sbDeletePatient(id) {
   } catch(e) { console.warn('sbDeletePatient exception:', e); updateSyncIndicator('err'); return false; }
 }
 
+// ════════════════════════════════════════════════
+// SUPABASE — BILANS CRUD
+// ════════════════════════════════════════════════
+async function sbSaveBilan(patientId, bilan) {
+  if (!sb || !currentUser) return false;
+  updateSyncIndicator('syncing');
+  try {
+    const row = {
+      patient_id: patientId,
+      diag:    bilan.diag    || null,
+      deb:     bilan.deb     || null,
+      ant:     bilan.ant     || null,
+      eva:     bilan.eva     || null,
+      dloc:    bilan.dloc    || null,
+      dcar:    bilan.dcar    || null,
+      damp:    bilan.damp    || null,
+      dnoc:    bilan.dnoc    || null,
+      daut:    bilan.daut    || null,
+      insp:    bilan.insp    || null,
+      mob:     bilan.mob     || null,
+      force_m: bilan.force   || null,
+      neuro:   bilan.neuro   || null,
+      fonc:    bilan.fonc    || null,
+      aut:     bilan.aut     || null,
+      oc:      bilan.oc      || null,
+      ol:      bilan.ol      || null,
+      nt:      bilan.nt      || null,
+    };
+    // Upsert basé sur patient_id (1 bilan par patient)
+    const { error } = await sb.from('bilans').upsert(row, { onConflict: 'patient_id' });
+    if (error) { console.warn('sbSaveBilan error:', error); updateSyncIndicator('err'); return false; }
+    updateSyncIndicator('ok');
+    return true;
+  } catch(e) { console.warn('sbSaveBilan exception:', e); updateSyncIndicator('err'); return false; }
+}
+
+async function sbLoadBilan(patientId) {
+  if (!sb || !currentUser) return null;
+  try {
+    const { data, error } = await sb.from('bilans').select('*').eq('patient_id', patientId).single();
+    if (error && error.code !== 'PGRST116') { console.warn('sbLoadBilan error:', error); return null; }
+    if (!data) return null;
+    // Mapper force_m -> force pour la cohérence locale
+    return {
+      diag:  data.diag  || '',
+      deb:   data.deb   || '',
+      ant:   data.ant   || '',
+      eva:   data.eva   || '',
+      dloc:  data.dloc  || '',
+      dcar:  data.dcar  || '',
+      damp:  data.damp  || '',
+      dnoc:  data.dnoc  || '',
+      daut:  data.daut  || '',
+      insp:  data.insp  || '',
+      mob:   data.mob   || '',
+      force: data.force_m || '',
+      neuro: data.neuro || '',
+      fonc:  data.fonc  || '',
+      aut:   data.aut   || '',
+      oc:    data.oc    || '',
+      ol:    data.ol    || '',
+      nt:    data.nt    || '',
+    };
+  } catch(e) { console.warn('sbLoadBilan exception:', e); return null; }
+}
+
 // ════════════════════════════════
 // EXPORT / IMPORT
 // ════════════════════════════════
@@ -1595,7 +1661,7 @@ function filterPts(v) { renderSB(v); }
 // ════════════════════════════════
 // SELECT PATIENT
 // ════════════════════════════════
-function selPt(id) {
+async function selPt(id) {
   cpid=id; const p=getPt(); if(!p) return;
   renderSB(document.getElementById('sb-inp').value);
   document.getElementById('ph-av').textContent=initials(p.prenom+' '+p.nom);
@@ -1609,6 +1675,10 @@ function selPt(id) {
   document.getElementById('ph-meta').innerHTML=parts.map(m=>`<span>${m}</span>`).join('');
   document.getElementById('empty').style.display='none';
   document.getElementById('pv').style.display='flex';
+  // Charger le bilan depuis Supabase (en arrière-plan, avec fallback local)
+  sbLoadBilan(p.id).then(sbBilan => {
+    if (sbBilan) { p.bilan = sbBilan; saveDB(); loadBilan(p); }
+  });
   loadBilan(p); renderCycles(p); renderEvals(p); renderDash(p); updateEvalBadge(p);
   swTab('dashboard');
   calDate=new Date();
@@ -1749,7 +1819,11 @@ function saveBilan() {
     ol: g('b-ol').value.trim(),
     nt: g('b-nt').value.trim(),
   };
-  saveDB(); showToast('✓ Bilan enregistré','ok');
+  saveDB();
+  sbSaveBilan(p.id, p.bilan).then(ok => {
+    if (ok) showToast('✓ Bilan enregistré','ok');
+    else showToast('✓ Bilan enregistré localement (erreur sync cloud)','ok');
+  });
 }
 
 // ════════════════════════════════
