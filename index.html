@@ -951,9 +951,13 @@ const LOGIN_URL = 'login.html';
 let sb = null;
 let currentUser = null;
 try {
-  const mod = window.supabase;
-  if (mod && mod.createClient) sb = mod.createClient(SUPABASE_URL, SUPABASE_KEY);
-} catch(e) { console.warn('Supabase non disponible:', e); }
+  if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } else if (typeof createClient === 'function') {
+    sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+  if (!sb) console.warn('Supabase createClient introuvable');
+} catch(e) { console.warn('Supabase init error:', e); }
 
 // Vérifier la session au chargement — rediriger si pas connecté
 (async function checkAuth() {
