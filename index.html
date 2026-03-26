@@ -996,102 +996,118 @@ window.onerror = function(msg, src, line) {
 // ════════════════════════════════
 const SK = 'kineplan_v31';
 
-function loadDB() {
-  try {
-    const raw = localStorage.getItem(SK);
-    if (raw) return migrateDB(JSON.parse(raw));
-    // Try importing from older versions
-    for (const oldKey of ['kineplan_v3', 'kineplan_v2']) {
-      const old = localStorage.getItem(oldKey);
-      if (old) { console.log('PhysioPlan: import depuis', oldKey); return migrateDB(JSON.parse(old)); }
-    }
-    return freshDB();
-  } catch(e) {
-    console.warn('PhysioPlan loadDB error:', e);
-    return freshDB();
-  }
-}
-
 function freshDB() {
   return { patients: [], library: [...DEFAULT_LIB], version: 31 };
 }
 
-function migrateDB(d) {
-  if (!d || typeof d !== 'object') return freshDB();
-  if (!Array.isArray(d.patients)) d.patients = [];
-  if (!Array.isArray(d.library) || !d.library.length) d.library = [...DEFAULT_LIB];
-  d.patients.forEach(p => {
-    if (!p.id) p.id = uid();
-    if (!p.bilan) p.bilan = {};
-    if (!Array.isArray(p.cycles)) p.cycles = [];
-    if (!Array.isArray(p.evaluations)) p.evaluations = [];
-    if (!p.seances || typeof p.seances !== 'object') p.seances = {};
-    if (!p.color) p.color = CYCLE_COLORS[0];
-    // Migrate seances stored inside cycles (old format)
-    p.cycles.forEach(c => {
-      if (c.seances && typeof c.seances === 'object') {
-        Object.assign(p.seances, c.seances);
-        delete c.seances;
-      }
-    });
-  });
-  return d;
-}
-
-// ════════════════════════════════════════════════
-// SAUVEGARDE AUTOMATIQUE ONEDRIVE
-// Envoie les données au serveur Python local
-// ════════════════════════════════════════════════
-const AUTOSAVE_URL = 'http://localhost:5678';
-let _autoSaveTimer = null;
-let _autoSaveOk = null; // null=inconnu, true=connecté, false=non connecté
-
-function autoSaveToOneDrive() {
-  // Envoi en arrière-plan — silencieux si le serveur n'est pas lancé
-  fetch(AUTOSAVE_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(db)
-  })
-  .then(r => r.json())
-  .then(() => {
-    if (_autoSaveOk !== true) {
-      _autoSaveOk = true;
-      updateAutoSaveIndicator(true);
-    }
-  })
-  .catch(() => {
-    if (_autoSaveOk !== false) {
-      _autoSaveOk = false;
-      updateAutoSaveIndicator(false);
+function migrateLocalPatient(p) {
+  if (!p.id) p.id = uid();
+  if (!p.bilan) p.bilan = {};
+  if (!Array.isArray(p.cycles)) p.cycles = [];
+  if (!Array.isArray(p.evaluations)) p.evaluations = [];
+  if (!p.seances || typeof p.seances !== 'object') p.seances = {};
+  if (!p.color) p.color = CYCLE_COLORS[0];
+  // Migrate seances stored inside cycles (old format)
+  p.cycles.forEach(c => {
+    if (c.seances && typeof c.seances === 'object') {
+      Object.assign(p.seances, c.seances);
+      delete c.seances;
     }
   });
+  return p;
 }
 
-function updateAutoSaveIndicator(connected) {
-  const el = document.getElementById('autosave-indicator');
-  if (!el) return;
-  if (connected) {
-    el.innerHTML = '🟢 OneDrive sync';
-    el.title = 'Sauvegarde automatique OneDrive active';
-    el.style.color = 'var(--accent)';
-  } else {
-    el.innerHTML = '⚪ OneDrive hors ligne';
-    el.title = 'Serveur physioplan_save.py non détecté — vos données restent dans le navigateur';
-    el.style.color = 'var(--muted)';
-  }
+function loadLocalMeta() {
+  // Charge uniquement library + version depuis localStorage (les patients viennent de Supabase)
+  try {
+    const raw = localStorage.getItem(SK);
+    if (raw) {
+      const d = JSON.parse(raw);
+      return {
+        library: Array.isArray(d.library) && d.library.length ? d.library : [...DEFAULT_LIB],
+        version: d.version || 31
+      };
+    }
+  } catch(e) { console.warn('loadLocalMeta error:', e); }
+  return { library: [...DEFAULT_LIB], version: 31 };
 }
 
 function saveDB() {
+  // Sauvegarde locale complète (patients inclus comme cache offline)
   try {
     localStorage.setItem(SK, JSON.stringify(db));
-    // Envoi auto vers OneDrive (debounce 2s pour ne pas spammer)
-    if (_autoSaveTimer) clearTimeout(_autoSaveTimer);
-    _autoSaveTimer = setTimeout(autoSaveToOneDrive, 2000);
   } catch(e) {
     if (e.name === 'QuotaExceededError') showToast('⚠️ Stockage plein ! Exportez vos données.', 'err', 4000);
-    else showToast('⚠️ Erreur de sauvegarde', 'err');
+    else showToast('⚠️ Erreur de sauvegarde locale', 'err');
   }
+}
+
+// ════════════════════════════════════════════════
+// SUPABASE — PATIENTS CRUD
+// ════════════════════════════════════════════════
+
+function updateSyncIndicator(state) {
+  // state: 'syncing' | 'ok' | 'err'
+  const el = document.getElementById('autosave-indicator');
+  if (!el) return;
+  if (state === 'syncing') {
+    el.innerHTML = '🔄 Synchronisation…';
+    el.style.color = 'rgba(255,255,255,.4)';
+    el.title = 'Enregistrement en cours…';
+  } else if (state === 'ok') {
+    el.innerHTML = '🟢 Cloud sync';
+    el.style.color = 'var(--accent)';
+    el.title = 'Données synchronisées avec Supabase';
+  } else {
+    el.innerHTML = '🔴 Erreur sync';
+    el.style.color = 'var(--red)';
+    el.title = 'Erreur de synchronisation Supabase';
+  }
+}
+
+async function sbLoadPatients() {
+  if (!sb || !currentUser) return null;
+  try {
+    const { data, error } = await sb
+      .from('patients')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: true });
+    if (error) { console.warn('sbLoadPatients error:', error); return null; }
+    return data;
+  } catch(e) { console.warn('sbLoadPatients exception:', e); return null; }
+}
+
+async function sbSavePatient(p) {
+  // p = objet patient complet (localement enrichi avec bilan/cycles/etc.)
+  if (!sb || !currentUser) return false;
+  updateSyncIndicator('syncing');
+  try {
+    const row = {
+      id: p.id,
+      user_id: currentUser.id,
+      prenom: p.prenom,
+      nom: p.nom,
+      dob: p.dob || null,
+      patho: p.patho || null,
+      color: p.color || CYCLE_COLORS[0]
+    };
+    const { error } = await sb.from('patients').upsert(row, { onConflict: 'id' });
+    if (error) { console.warn('sbSavePatient error:', error); updateSyncIndicator('err'); return false; }
+    updateSyncIndicator('ok');
+    return true;
+  } catch(e) { console.warn('sbSavePatient exception:', e); updateSyncIndicator('err'); return false; }
+}
+
+async function sbDeletePatient(id) {
+  if (!sb || !currentUser) return false;
+  updateSyncIndicator('syncing');
+  try {
+    const { error } = await sb.from('patients').delete().eq('id', id).eq('user_id', currentUser.id);
+    if (error) { console.warn('sbDeletePatient error:', error); updateSyncIndicator('err'); return false; }
+    updateSyncIndicator('ok');
+    return true;
+  } catch(e) { console.warn('sbDeletePatient exception:', e); updateSyncIndicator('err'); return false; }
 }
 
 // ════════════════════════════════
@@ -1390,7 +1406,7 @@ const EBP_LIB = [
 ];
 const EVA_LABELS   = {0:'Aucune',1:'Très légère',2:'Légère',3:'Modérée légère',4:'Modérée',5:'Moyenne',6:'Assez forte',7:'Forte',8:'Très forte',9:'Extrêmement forte',10:'Maximale'};
 
-let db   = loadDB();
+let db   = freshDB(); // sera peuplé par initDB() + Supabase dans INIT
 let cpid = null;
 let cSeance = null;
 let editingCycleId = null;
@@ -1651,19 +1667,25 @@ function savePt() {
   if(editingPtMode) {
     const p=getPt(); p.prenom=prenom; p.nom=nom; p.dob=dob; p.patho=patho;
     saveDB(); closeMo(); selPt(p.id); renderSB(); showToast('✓ Patient modifié','ok');
+    sbSavePatient(p).then(ok=>{ if(!ok) showToast('⚠️ Erreur sync cloud (modif)','err'); });
   } else {
     const p={id:uid(),prenom,nom,dob,patho,color:CYCLE_COLORS[db.patients.length%CYCLE_COLORS.length],bilan:{},cycles:[],evaluations:[],seances:{}};
     db.patients.push(p); saveDB(); closeMo(); renderSB(); selPt(p.id); showToast('✓ Patient créé','ok');
+    sbSavePatient(p).then(ok=>{ if(!ok) showToast('⚠️ Erreur sync cloud (création)','err'); });
   }
 }
 function confirmDeletePt() {
   const p=getPt(); if(!p) return;
   showConfirm(`Supprimer ${p.prenom} ${p.nom} ?`,
     `Ce dossier contient ${(p.cycles||[]).length} cycle(s) et ${(p.evaluations||[]).length} évaluation(s). Action irréversible.`,
-    ()=>{ db.patients=db.patients.filter(x=>x.id!==cpid); saveDB(); cpid=null;
+    ()=>{
+      const deletedId=cpid;
+      db.patients=db.patients.filter(x=>x.id!==cpid); saveDB(); cpid=null;
       document.getElementById('empty').style.display='flex';
       document.getElementById('pv').style.display='none';
-      renderSB(); showToast('✓ Patient supprimé'); });
+      renderSB(); showToast('✓ Patient supprimé');
+      sbDeletePatient(deletedId).then(ok=>{ if(!ok) showToast('⚠️ Erreur sync cloud (suppression)','err'); });
+    });
 }
 
 // ════════════════════════════════
@@ -3142,41 +3164,85 @@ document.addEventListener('keydown', e => {
 // INIT
 // ════════════════════════════════
 buildPS('b-ps','b-eva');
-renderSB();
-// Vérifier la connexion au serveur OneDrive au démarrage
-setTimeout(() => {
-  fetch(AUTOSAVE_URL, { method: 'OPTIONS' })
-    .then(() => { _autoSaveOk = true; updateAutoSaveIndicator(true); })
-    .catch(() => { _autoSaveOk = false; updateAutoSaveIndicator(false); });
-}, 1000);
 
-if (!db.patients.length) {
-  const demo = {
-    id: uid(), prenom: 'Marie', nom: 'Dupont', dob: '1989-04-15', patho: 'LCA droit', color: '#2E6B56',
-    bilan: { diag: 'Rupture LCA droit - Post-op J+45', deb: '2026-01-20',
-      ant: 'Aucun antécédent. Sportive (volleyball, 3x/sem).', eva: '3',
-      mob: 'Flexion 90°, extension complète', force: 'Testing quadriceps 3/5, ischio 4/5',
-      aut: 'Single leg stance : instabilité modérée',
-      oc: 'Récupérer la mobilité complète et marcher sans boiterie',
-      ol: 'Reprise du volleyball dans 6 mois', nt: 'Très motivée, bonne observance' },
-    cycles: [{ id: 'c1', nom: 'Cycle 1 – Renforcement initial', debut: '2026-01-20',
-      dur: 4, freq: 2, evf: 4, color: '#2E6B56',
-      obj: "Récupérer force et mobilité de base, diminuer l'œdème",
-      ctn: 'Vélo ergomètre, isométrique quadriceps, mobilisation passive, cryothérapie' }],
-    evaluations: [
-      { id: uid(), date: '2026-02-17', type: 'intermediaire', eva: '2', mob: 'Flexion 110°', force: 'Testing 4/5', aut: '', nt: 'Belle progression.' },
-      { id: uid(), date: '2026-01-20', type: 'bilan-initial', eva: '4', mob: 'Flexion 90°, extension -5°', force: 'Testing 2+/5', aut: 'Single leg squat impossible', nt: 'Post-op J+45.' }
-    ],
-    seances: { 'c1_0': { notes: "Bonne séance. Légère douleur en fin d'effort.", rpe: '5',
-      exos: [
-        { lib: 'Vélo ergomètre', series: '1', reps: '20 min', charge: '', tempo: '', recup: '', rpe: '3' },
-        { lib: 'Isométrique quadriceps', series: '3', reps: '10', charge: '', tempo: '5-0-5', recup: '60s', rpe: '4' }
-      ]}}
-  };
-  db.patients.push(demo);
+// Initialiser db avec la library locale + patients du cache localStorage
+(function initDB() {
+  const meta = loadLocalMeta();
+  db = { patients: [], library: meta.library, version: meta.version };
+  // Charger le cache local patients (pour affichage immédiat)
+  try {
+    const raw = localStorage.getItem(SK);
+    if (raw) {
+      const cached = JSON.parse(raw);
+      if (Array.isArray(cached.patients)) {
+        db.patients = cached.patients.map(p => migrateLocalPatient(p));
+      }
+    }
+  } catch(e) { console.warn('Cache local patients error:', e); }
+  renderSB();
+})();
+
+// Puis charger les patients depuis Supabase (source de vérité)
+(async function loadFromSupabase() {
+  if (!sb) { updateSyncIndicator('err'); return; }
+  // Attendre que currentUser soit défini (auth async)
+  let attempts = 0;
+  while (!currentUser && attempts < 20) {
+    await new Promise(r => setTimeout(r, 150));
+    attempts++;
+  }
+  if (!currentUser) { updateSyncIndicator('err'); return; }
+
+  updateSyncIndicator('syncing');
+  const sbPatients = await sbLoadPatients();
+  if (sbPatients === null) { updateSyncIndicator('err'); return; }
+
+  // Fusionner : garder les données locales (bilan, cycles, séances, évals) mais mettre à jour les champs cloud
+  const localMap = {};
+  db.patients.forEach(p => { localMap[p.id] = p; });
+
+  db.patients = sbPatients.map(row => {
+    const local = localMap[row.id] || {};
+    return migrateLocalPatient({
+      id: row.id,
+      prenom: row.prenom,
+      nom: row.nom,
+      dob: row.dob || local.dob || '',
+      patho: row.patho || local.patho || '',
+      color: row.color || local.color || CYCLE_COLORS[0],
+      bilan: local.bilan || {},
+      cycles: local.cycles || [],
+      evaluations: local.evaluations || [],
+      seances: local.seances || {}
+    });
+  });
+
+  // Patients en local mais pas encore dans Supabase (créés hors ligne) → upserter
+  const sbIds = new Set(sbPatients.map(r => r.id));
+  const toSync = db.patients.filter(p => !sbIds.has(p.id));
+  if (toSync.length > 0) {
+    for (const p of toSync) { await sbSavePatient(p); }
+  }
+
   saveDB();
   renderSB();
-}
+
+  // Restaurer la sélection si un patient était ouvert
+  if (cpid && db.patients.find(p => p.id === cpid)) {
+    selPt(cpid);
+  }
+  updateSyncIndicator('ok');
+
+  // Afficher l'email utilisateur dans l'indicateur
+  const indicator = document.getElementById('autosave-indicator');
+  if (indicator && currentUser) {
+    setTimeout(() => {
+      indicator.innerHTML = '🟢 ' + currentUser.email;
+      indicator.style.color = 'rgba(255,255,255,.5)';
+      indicator.title = 'Connecté — données synchronisées avec Supabase';
+    }, 2000);
+  }
+})();
 </script>
 </body>
 </html>
