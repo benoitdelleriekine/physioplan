@@ -1004,8 +1004,10 @@ function freshDB() {
   return { patients: [], library: [...DEFAULT_LIB], version: 31 };
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function migrateLocalPatient(p) {
-  if (!p.id) p.id = uid();
+  // Migrer les anciens IDs courts vers UUID v4 (requis par Supabase)
+  if (!p.id || !UUID_REGEX.test(p.id)) p.id = uid();
   if (!p.bilan) p.bilan = {};
   if (!Array.isArray(p.cycles)) p.cycles = [];
   if (!Array.isArray(p.evaluations)) p.evaluations = [];
@@ -1422,7 +1424,7 @@ let confirmCallback = null;
 // ════════════════════════════════
 // UTILS
 // ════════════════════════════════
-const uid      = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const uid      = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16); });
 const clean    = s => (s || '').trim().replace(/\s+/g, ' ');
 const today    = () => new Date().toISOString().slice(0,10);
 const getPt    = () => db.patients.find(p => p.id === cpid) || null;
