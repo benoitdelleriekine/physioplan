@@ -1238,6 +1238,47 @@ async function sbLoadCycles(patientId) {
   } catch(e) { console.warn('sbLoadCycles exception:', e); return null; }
 }
 
+   // ════════════════════════════════════════════════
+// SUPABASE — SEANCES CRUD
+// ════════════════════════════════════════════════
+async function sbSaveSeance(cycleId, idx, sd) {
+  if (!sb || !currentUser) return false;
+  updateSyncIndicator('syncing');
+  try {
+    const row = {
+      cycle_id: cycleId,
+      index_in_cycle: idx,
+      date_effective: sd.date || null,
+      notes: sd.notes || null,
+      rpe: sd.rpe || null,
+      blocs: sd.blocs || []
+    };
+    const { error } = await sb.from('seances').upsert(row, { onConflict: 'cycle_id,index_in_cycle' });
+    if (error) { console.warn('sbSaveSeance error:', error); updateSyncIndicator('err'); return false; }
+    updateSyncIndicator('ok');
+    return true;
+  } catch(e) { console.warn('sbSaveSeance exception:', e); updateSyncIndicator('err'); return false; }
+}
+
+async function sbLoadSeances(cycleIds) {
+  if (!sb || !currentUser || !cycleIds || !cycleIds.length) return null;
+  try {
+    const { data, error } = await sb.from('seances').select('*').in('cycle_id', cycleIds);
+    if (error) { console.warn('sbLoadSeances error:', error); return null; }
+    if (!data) return {};
+    const result = {};
+    data.forEach(s => {
+      const key = s.cycle_id + '_' + s.index_in_cycle;
+      result[key] = {
+        blocs: s.blocs || [],
+        notes: s.notes || '',
+        rpe: s.rpe || '',
+        date: s.date_effective || undefined
+      };
+    });
+    return result;
+  } catch(e) { console.warn('sbLoadSeances exception:', e); return null; }
+}
    
 // ════════════════════════════════
 // EXPORT / IMPORT
