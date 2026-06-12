@@ -1732,9 +1732,13 @@ async function selPt(id) {
   document.getElementById('ph-meta').innerHTML=parts.map(m=>`<span>${m}</span>`).join('');
   document.getElementById('empty').style.display='none';
   document.getElementById('pv').style.display='flex';
-  // Charger le bilan depuis Supabase (en arrière-plan, avec fallback local)
+ // Charger le bilan depuis Supabase (en arrière-plan, avec fallback local)
   sbLoadBilan(p.id).then(sbBilan => {
     if (sbBilan) { p.bilan = sbBilan; saveDB(); loadBilan(p); }
+  });
+  // Charger les cycles depuis Supabase (en arrière-plan, avec fallback local)
+  sbLoadCycles(p.id).then(sbCycles => {
+    if (sbCycles) { p.cycles = sbCycles; saveDB(); renderCycles(p); renderCal(); updateEvalBadge(p); }
   });
   loadBilan(p); renderCycles(p); renderEvals(p); renderDash(p); updateEvalBadge(p);
   swTab('dashboard');
