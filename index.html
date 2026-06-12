@@ -1777,9 +1777,14 @@ async function selPt(id) {
   sbLoadBilan(p.id).then(sbBilan => {
     if (sbBilan) { p.bilan = sbBilan; saveDB(); loadBilan(p); }
   });
-  // Charger les cycles depuis Supabase (en arrière-plan, avec fallback local)
+ // Charger les cycles depuis Supabase (en arrière-plan, avec fallback local)
   sbLoadCycles(p.id).then(sbCycles => {
     if (sbCycles) { p.cycles = sbCycles; saveDB(); renderCycles(p); renderCal(); updateEvalBadge(p); }
+    // Charger les séances depuis Supabase (après les cycles, on a besoin de leurs ids)
+    const cycleIds = (p.cycles||[]).map(c=>c.id);
+    sbLoadSeances(cycleIds).then(sbSeances => {
+      if (sbSeances) { p.seances = Object.assign({}, p.seances, sbSeances); saveDB(); renderCycles(p); renderCal(); }
+    });
   });
   loadBilan(p); renderCycles(p); renderEvals(p); renderDash(p); updateEvalBadge(p);
   swTab('dashboard');
@@ -2500,10 +2505,10 @@ function saveSeance() {
   const calcDate = genSeances(p.cycles.find(c=>c.id===cSeance.cycleId)||{})[cSeance.idx] || savedDate;
   p.seances[key].date  = (savedDate && savedDate !== calcDate) ? savedDate : undefined;
   p.seances[key].notes = document.getElementById('s-notes').value.trim();
-  p.seances[key].rpe   = document.getElementById('s-rpe').value;
+ p.seances[key].rpe   = document.getElementById('s-rpe').value;
   saveDB(); closeMo(); renderCycles(p); renderCal(); showToast('✓ Séance enregistrée','ok');
+  sbSaveSeance(cSeance.cycleId, cSeance.idx, p.seances[key]).then(ok=>{ if(!ok) showToast('⚠️ Erreur sync cloud (séance)','err'); });
 }
-
 // ════════════════════════════════
 // REPLICATE SEANCE
 // ════════════════════════════════
