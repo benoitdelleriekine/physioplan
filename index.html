@@ -1181,7 +1181,64 @@ async function sbLoadBilan(patientId) {
     };
   } catch(e) { console.warn('sbLoadBilan exception:', e); return null; }
 }
+// ════════════════════════════════════════════════
+// SUPABASE — CYCLES CRUD
+// ════════════════════════════════════════════════
+async function sbSaveCycle(patientId, c) {
+  if (!sb || !currentUser) return false;
+  updateSyncIndicator('syncing');
+  try {
+    const row = {
+      id: c.id,
+      patient_id: patientId,
+      nom: c.nom,
+      debut: c.debut,
+      dur: c.dur,
+      freq: c.freq,
+      evf: c.evf || null,
+      color: c.color || null,
+      obj: c.obj || null,
+      ctn: c.ctn || null
+    };
+    const { error } = await sb.from('cycles').upsert(row, { onConflict: 'id' });
+    if (error) { console.warn('sbSaveCycle error:', error); updateSyncIndicator('err'); return false; }
+    updateSyncIndicator('ok');
+    return true;
+  } catch(e) { console.warn('sbSaveCycle exception:', e); updateSyncIndicator('err'); return false; }
+}
 
+async function sbDeleteCycle(id) {
+  if (!sb || !currentUser) return false;
+  updateSyncIndicator('syncing');
+  try {
+    const { error } = await sb.from('cycles').delete().eq('id', id);
+    if (error) { console.warn('sbDeleteCycle error:', error); updateSyncIndicator('err'); return false; }
+    updateSyncIndicator('ok');
+    return true;
+  } catch(e) { console.warn('sbDeleteCycle exception:', e); updateSyncIndicator('err'); return false; }
+}
+
+async function sbLoadCycles(patientId) {
+  if (!sb || !currentUser) return null;
+  try {
+    const { data, error } = await sb.from('cycles').select('*').eq('patient_id', patientId).order('created_at', { ascending: true });
+    if (error) { console.warn('sbLoadCycles error:', error); return null; }
+    if (!data) return [];
+    return data.map(c => ({
+      id: c.id,
+      nom: c.nom,
+      debut: c.debut,
+      dur: c.dur,
+      freq: c.freq,
+      evf: c.evf || null,
+      color: c.color || CYCLE_COLORS[0],
+      obj: c.obj || '',
+      ctn: c.ctn || ''
+    }));
+  } catch(e) { console.warn('sbLoadCycles exception:', e); return null; }
+}
+
+   
 // ════════════════════════════════
 // EXPORT / IMPORT
 // ════════════════════════════════
