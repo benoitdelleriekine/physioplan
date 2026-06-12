@@ -1965,9 +1965,10 @@ function confirmDeleteCycle(cycleId) {
   const p=getPt(); const c=(p.cycles||[]).find(x=>x.id===cycleId); if(!c) return;
   showConfirm(`Supprimer le cycle "${c.nom}" ?`,
     `${genSeances(c).length} séances seront supprimées. Action irréversible.`,
-    ()=>{ p.cycles=p.cycles.filter(x=>x.id!==cycleId);
+   ()=>{ p.cycles=p.cycles.filter(x=>x.id!==cycleId);
       Object.keys(p.seances||{}).forEach(k=>{if(k.startsWith(cycleId+'_')) delete p.seances[k];});
-      saveDB(); renderCycles(p); renderCal(); updateEvalBadge(p); showToast('✓ Cycle supprimé'); });
+      saveDB(); renderCycles(p); renderCal(); updateEvalBadge(p); showToast('✓ Cycle supprimé');
+      sbDeleteCycle(cycleId).then(ok=>{ if(!ok) showToast('⚠️ Erreur sync cloud (suppr. cycle)','err'); }); });
 }
 function openCopyCycle() {
   const p=getPt(); if(!p||!p.cycles||!p.cycles.length){showToast('⚠️ Aucun cycle à copier','err'); return;}
