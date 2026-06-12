@@ -1991,8 +1991,10 @@ function doCopyCycle() {
   const nom=clean(document.getElementById('copy-nom').value)||src.nom+' (copie)';
   const deb=document.getElementById('copy-deb').value||today();
   if(!isValidDate(deb)){showToast('⚠️ Date invalide','err'); return;}
-  p.cycles.push({...JSON.parse(JSON.stringify(src)),id:uid(),nom,debut:deb});
+  const newCycle = {...JSON.parse(JSON.stringify(src)),id:uid(),nom,debut:deb};
+  p.cycles.push(newCycle);
   saveDB(); closeMo(); renderCycles(p); renderCal(); showToast('✓ Cycle copié','ok');
+  sbSaveCycle(p.id, newCycle).then(ok=>{ if(!ok) showToast('⚠️ Erreur sync cloud (cycle)','err'); });
 }
 function renderCycles(p) {
   const el=document.getElementById('cycles-list');
