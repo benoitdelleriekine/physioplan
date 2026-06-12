@@ -1956,8 +1956,10 @@ function saveCycle() {
     p.cycles.push({id:uid(),nom,debut,dur,freq,evf,color,obj:document.getElementById('cy-obj').value.trim(),ctn:document.getElementById('cy-ctn').value.trim()});
     showToast('✓ Cycle créé','ok');
   }
+const savedCycle = editingCycleId ? p.cycles.find(x=>x.id===editingCycleId) : p.cycles[p.cycles.length-1];
   editingCycleId=null;
   saveDB(); closeMo(); renderCycles(p); renderCal();
+  sbSaveCycle(p.id, savedCycle).then(ok=>{ if(!ok) showToast('⚠️ Erreur sync cloud (cycle)','err'); });
 }
 function confirmDeleteCycle(cycleId) {
   const p=getPt(); const c=(p.cycles||[]).find(x=>x.id===cycleId); if(!c) return;
