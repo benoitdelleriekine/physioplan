@@ -1835,11 +1835,15 @@ async function selPt(id) {
  // Charger les cycles depuis Supabase (en arrière-plan, avec fallback local)
   sbLoadCycles(p.id).then(sbCycles => {
     if (sbCycles) { p.cycles = sbCycles; saveDB(); renderCycles(p); renderCal(); updateEvalBadge(p); }
-    // Charger les séances depuis Supabase (après les cycles, on a besoin de leurs ids)
+   // Charger les séances depuis Supabase (après les cycles, on a besoin de leurs ids)
     const cycleIds = (p.cycles||[]).map(c=>c.id);
     sbLoadSeances(cycleIds).then(sbSeances => {
       if (sbSeances) { p.seances = Object.assign({}, p.seances, sbSeances); saveDB(); renderCycles(p); renderCal(); }
     });
+  });
+  // Charger les évaluations depuis Supabase (en arrière-plan, avec fallback local)
+  sbLoadEvals(p.id).then(sbEvals => {
+    if (sbEvals) { p.evaluations = sbEvals; saveDB(); renderEvals(p); updateEvalBadge(p); renderSB(); }
   });
   loadBilan(p); renderCycles(p); renderEvals(p); renderDash(p); updateEvalBadge(p);
   swTab('dashboard');
@@ -2930,18 +2934,21 @@ function saveEval() {
   const errEl=document.getElementById('ev-error'); errEl.textContent='';
   if(!date||!isValidDate(date)){errEl.textContent='Date invalide.'; return;}
   if(!p.evaluations) p.evaluations=[];
-  p.evaluations.push({id:uid(),date,type:document.getElementById('ev-type').value,
+ const newEval = {id:uid(),date,type:document.getElementById('ev-type').value,
     eva:document.getElementById('ev-eva').value,mob:clean(document.getElementById('ev-mob').value),
     force:clean(document.getElementById('ev-for').value),aut:clean(document.getElementById('ev-aut').value),
-    nt:document.getElementById('ev-nt').value.trim()});
+    nt:document.getElementById('ev-nt').value.trim()};
+  p.evaluations.push(newEval);
   p.evaluations.sort((a,b)=>b.date.localeCompare(a.date));
   saveDB(); closeMo(); renderEvals(p); updateEvalBadge(p); renderSB(); showToast('✓ Évaluation enregistrée','ok');
+  sbSaveEval(p.id, newEval).then(ok=>{ if(!ok) showToast('⚠️ Erreur sync cloud (évaluation)','err'); });
 }
 function confirmDeleteEval(eid) {
   showConfirm('Supprimer cette évaluation ?','Action irréversible.',()=>{
     const p=getPt(); if(!p) return;
     p.evaluations=p.evaluations.filter(e=>e.id!==eid);
     saveDB(); renderEvals(p); updateEvalBadge(p); showToast('✓ Évaluation supprimée');
+    sbDeleteEval(eid).then(ok=>{ if(!ok) showToast('⚠️ Erreur sync cloud (suppr. évaluation)','err'); });
   });
 }
 function updateEvalBadge(p) {
