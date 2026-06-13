@@ -1279,6 +1279,61 @@ async function sbLoadSeances(cycleIds) {
     return result;
   } catch(e) { console.warn('sbLoadSeances exception:', e); return null; }
 }
+
+   // ════════════════════════════════════════════════
+// SUPABASE — EVALUATIONS CRUD
+// ════════════════════════════════════════════════
+async function sbSaveEval(patientId, e) {
+  if (!sb || !currentUser) return false;
+  updateSyncIndicator('syncing');
+  try {
+    const row = {
+      id: e.id,
+      patient_id: patientId,
+      date: e.date,
+      type: e.type || null,
+      eva: e.eva || null,
+      mob: e.mob || null,
+      force_m: e.force || null,
+      aut: e.aut || null,
+      nt: e.nt || null
+    };
+    const { error } = await sb.from('evaluations').upsert(row, { onConflict: 'id' });
+    if (error) { console.warn('sbSaveEval error:', error); updateSyncIndicator('err'); return false; }
+    updateSyncIndicator('ok');
+    return true;
+  } catch(e) { console.warn('sbSaveEval exception:', e); updateSyncIndicator('err'); return false; }
+}
+
+async function sbDeleteEval(id) {
+  if (!sb || !currentUser) return false;
+  updateSyncIndicator('syncing');
+  try {
+    const { error } = await sb.from('evaluations').delete().eq('id', id);
+    if (error) { console.warn('sbDeleteEval error:', error); updateSyncIndicator('err'); return false; }
+    updateSyncIndicator('ok');
+    return true;
+  } catch(e) { console.warn('sbDeleteEval exception:', e); updateSyncIndicator('err'); return false; }
+}
+
+async function sbLoadEvals(patientId) {
+  if (!sb || !currentUser) return null;
+  try {
+    const { data, error } = await sb.from('evaluations').select('*').eq('patient_id', patientId).order('date', { ascending: false });
+    if (error) { console.warn('sbLoadEvals error:', error); return null; }
+    if (!data) return [];
+    return data.map(e => ({
+      id: e.id,
+      date: e.date,
+      type: e.type || '',
+      eva: e.eva || '',
+      mob: e.mob || '',
+      force: e.force_m || '',
+      aut: e.aut || '',
+      nt: e.nt || ''
+    }));
+  } catch(e) { console.warn('sbLoadEvals exception:', e); return null; }
+}
    
 // ════════════════════════════════
 // EXPORT / IMPORT
