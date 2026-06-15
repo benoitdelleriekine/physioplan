@@ -422,16 +422,16 @@ textarea{resize:vertical;min-height:76px;line-height:1.65}
 /* ── RESPONSIVE — MOBILE/TABLET ──── */
 @media (max-width:880px){
   #mobile-topbar{display:flex}
-  body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+  body{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
   #app{height:auto;flex:1;min-height:0}
-  #sb{position:fixed;top:0;left:0;height:100vh;z-index:500;transform:translateX(-100%);transition:transform .25s ease;box-shadow:var(--sh-lg);width:min(var(--sb-w),82vw)}
+  #sb{position:fixed;top:0;left:0;height:100dvh;z-index:500;transform:translateX(-100%);transition:transform .25s ease;box-shadow:var(--sh-lg);width:min(var(--sb-w),82vw)}
   #sb.open{transform:translateX(0)}
   #sb-overlay.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:499}
   #main{width:100%}
   #ph{padding:16px 18px;flex-wrap:wrap}
   #ph-name{font-size:22px}
   #tabs{padding:0 12px}
-  #content{padding:18px}
+  #content{padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom) + 20px)}
 }
 
 /* ── PRINT ────────────────────────── */
