@@ -171,6 +171,10 @@ body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--
             <input class="form-input" id="signup-email" type="email" placeholder="prenom@cabinet.fr" required autocomplete="email">
           </div>
           <div class="form-group">
+            <label for="signup-invite">Code d'invitation</label>
+            <input class="form-input" id="signup-invite" type="text" placeholder="Fourni par votre kiné/administrateur" required autocomplete="off">
+          </div>
+          <div class="form-group">
             <label for="signup-pw">Mot de passe</label>
             <div class="pw-wrap">
               <input class="form-input" id="signup-pw" type="password" placeholder="Minimum 6 caractères" required minlength="6" autocomplete="new-password">
@@ -361,18 +365,27 @@ async function handleLogin(e) {
 // ════════════════════════════════
 async function handleSignup(e) {
   e.preventDefault();
-  const email = document.getElementById('signup-email').value.trim();
+ const email = document.getElementById('signup-email').value.trim();
   const pw    = document.getElementById('signup-pw').value;
   const pw2   = document.getElementById('signup-pw2').value;
+  const invite = document.getElementById('signup-invite').value.trim();
 
-  if (!email || !pw || !pw2) { showMsg('signup-msg', 'Veuillez remplir tous les champs.', 'err'); return; }
+  if (!email || !pw || !pw2 || !invite) { showMsg('signup-msg', 'Veuillez remplir tous les champs.', 'err'); return; }
   if (!sb) { showMsg('signup-msg', 'Erreur : Supabase non chargé. Rechargez la page.', 'err'); return; }
   if (pw.length < 6) { showMsg('signup-msg', 'Le mot de passe doit contenir au moins 6 caractères.', 'err'); return; }
   if (pw !== pw2) { showMsg('signup-msg', 'Les mots de passe ne correspondent pas.', 'err'); return; }
 
-  setLoading('btn-signup', true);
+ setLoading('btn-signup', true);
 
   try {
+    // Vérifier le code d'invitation avant de créer le compte
+    const { data: codeValid, error: codeErr } = await sb.rpc('check_invite_code', { p_code: invite });
+    if (codeErr || !codeValid) {
+      showMsg('signup-msg', "Code d'invitation invalide ou expiré.", 'err');
+      setLoading('btn-signup', false);
+      return;
+    }
+
     const { data, error } = await sb.auth.signUp({
       email: email,
       password: pw
