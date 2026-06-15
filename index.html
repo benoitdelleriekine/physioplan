@@ -3052,6 +3052,73 @@ function renderCal() {
 }
 
 // ════════════════════════════════
+// DICTÉE VOCALE
+// ════════════════════════════════
+const DICTATION_FIELDS = ['b-ant','b-insp','b-mob','b-for','b-neuro','b-fonc','b-aut','b-oc','b-ol','b-nt','s-notes','ev-mob','ev-for','ev-aut','ev-nt'];
+let dictationRecognition = null;
+let dictationActive = null;
+
+function setupDictation() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return; // navigateur non supporté → aucun bouton ajouté
+  DICTATION_FIELDS.forEach(id => {
+    const ta = document.getElementById(id);
+    if (!ta || ta.tagName !== 'TEXTAREA' || ta.dataset.micAdded) return;
+    ta.dataset.micAdded = '1';
+    ta.style.paddingRight = '42px';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mic-btn';
+    btn.title = 'Dictée vocale';
+    btn.innerHTML = '🎤';
+    btn.onclick = (e) => { e.preventDefault(); toggleDictation(id, btn); };
+    ta.parentElement.appendChild(btn);
+  });
+}
+
+function toggleDictation(id, btn) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  if (dictationActive === id) {
+    if (dictationRecognition) dictationRecognition.stop();
+    return;
+  }
+  if (dictationRecognition) dictationRecognition.stop();
+
+  const ta = document.getElementById(id);
+  const rec = new SR();
+  rec.lang = 'fr-FR';
+  rec.continuous = true;
+  rec.interimResults = false;
+
+  let base = ta.value;
+  if (base && !/[\s\n]$/.test(base)) base += ' ';
+
+  rec.onresult = (e) => {
+    let finalText = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
+    }
+    if (finalText) {
+      base += finalText.trim() + ' ';
+      ta.value = base;
+    }
+  };
+  rec.onerror = (e) => { console.warn('Dictée erreur:', e.error); };
+  rec.onend = () => {
+    btn.classList.remove('on');
+    if (dictationActive === id) dictationActive = null;
+    dictationRecognition = null;
+  };
+
+  rec.start();
+  dictationRecognition = rec;
+  dictationActive = id;
+  btn.classList.add('on');
+}
+
+   
+// ════════════════════════════════
 // EVALUATIONS
 // ════════════════════════════════
 function openAddEval() {
@@ -3581,6 +3648,7 @@ buildPS('b-ps','b-eva');
 })();
 
 // Puis charger les patients depuis Supabase (source de vérité)
+   setupDictation();
 (async function loadFromSupabase() {
   if (!sb) { updateSyncIndicator('err'); return; }
   // Attendre que currentUser soit défini (auth async)
