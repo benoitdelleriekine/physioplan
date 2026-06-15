@@ -112,6 +112,10 @@ hr{border:none;border-top:1px solid var(--border);margin:18px 0}
 .mic-btn{position:absolute;bottom:8px;right:8px;width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:var(--transition);z-index:2}
 .mic-btn:hover{background:var(--accent-l);color:var(--accent);border-color:var(--accent)}
 .mic-btn.on{background:var(--red);color:#fff;border-color:var(--red);animation:mic-pulse 1.2s infinite}
+.day-picker{display:flex;gap:6px;flex-wrap:wrap}
+.day-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--text);font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition)}
+.day-btn:hover{border-color:var(--accent)}
+.day-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 @keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(217,68,68,.5)}50%{box-shadow:0 0 0 8px rgba(217,68,68,0)}}
 .fg label{font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
 input[type="text"],input[type="number"],input[type="date"],input:not([type]),select,textarea{
@@ -774,7 +778,8 @@ textarea{resize:vertical;min-height:76px;line-height:1.65}
         <div class="fg"><label>Date de début *</label><input type="date" id="cy-deb"></div>
         <div class="fg"><label>Durée (semaines) *</label><input type="number" id="cy-dur" min="1" max="52" placeholder="4"></div>
         <div class="fg"><label>Séances / semaine *</label><input type="number" id="cy-freq" min="1" max="7" placeholder="2"></div>
-        <div class="fg"><label>Éval. intermédiaire (toutes les N séances)</label><input type="number" id="cy-evf" min="1" max="99" placeholder="Optionnel, ex: 6"></div>
+       <div class="fg"><label>Éval. intermédiaire (toutes les N séances)</label><input type="number" id="cy-evf" min="1" max="99" placeholder="Optionnel, ex: 6"></div>
+        <div class="fg s2"><label>Jours des séances (optionnel — sinon répartition automatique)</label><div class="day-picker" id="cy-jours"></div></div>
         <div class="fg s2"><label>Objectifs du cycle</label><textarea id="cy-obj" placeholder="Renforcement, proprioception…"></textarea></div>
         <div class="fg s2"><label>Contenu / Exercices prévus</label><textarea id="cy-ctn" placeholder="Squat, presse, vélo, gainage…"></textarea></div>
       </div>
@@ -1281,7 +1286,8 @@ async function sbSaveCycle(patientId, c) {
       evf: c.evf || null,
       color: c.color || null,
       obj: c.obj || null,
-      ctn: c.ctn || null
+     ctn: c.ctn || null,
+      jours: c.jours || null
     };
     const { error } = await sb.from('cycles').upsert(row, { onConflict: 'id' });
     if (error) { console.warn('sbSaveCycle error:', error); updateSyncIndicator('err'); return false; }
@@ -1316,7 +1322,8 @@ async function sbLoadCycles(patientId) {
       evf: c.evf || null,
       color: c.color || CYCLE_COLORS[0],
       obj: c.obj || '',
-      ctn: c.ctn || ''
+      ctn: c.ctn || '',
+      jours: c.jours || null
     }));
   } catch(e) { console.warn('sbLoadCycles exception:', e); return null; }
 }
@@ -1837,7 +1844,17 @@ function cycleProgress(c) {
   return {pct:Math.min(99,Math.round(((now-start)/(end-start))*100)), status:'encours', lbl:'En cours'};
 }
 function genSeances(c) {
-  const list=[], freq=Math.max(1,Math.min(7,parseInt(c.freq)||2)), dur=Math.max(1,parseInt(c.dur)||4);
+  const dur=Math.max(1,parseInt(c.dur)||4);
+  if (c.jours && c.jours.length) {
+    const list=[], base=new Date(c.debut+'T00:00:00'), totalDays=dur*7;
+    for (let i=0;i<totalDays;i++) {
+      const d=new Date(base); d.setDate(base.getDate()+i);
+      const wd=d.getDay()===0?7:d.getDay();
+      if (c.jours.includes(wd)) list.push(ymd(d));
+    }
+    return list;
+  }
+  const list=[], freq=Math.max(1,Math.min(7,parseInt(c.freq)||2));
   const total=freq*dur, gap=7/freq, base=new Date(c.debut+'T00:00:00');
   for (let i=0; i<total; i++) {
     const d=new Date(base); d.setDate(base.getDate()+Math.round(i*gap));
@@ -2132,6 +2149,22 @@ function saveBilan() {
   });
 }
 
+const WEEKDAYS = [{v:1,l:'L',n:'Lundi'},{v:2,l:'M',n:'Mardi'},{v:3,l:'M',n:'Mercredi'},{v:4,l:'J',n:'Jeudi'},{v:5,l:'V',n:'Vendredi'},{v:6,l:'S',n:'Samedi'},{v:7,l:'D',n:'Dimanche'}];
+let cyJoursSel = [];
+function renderCyJours(){
+  document.getElementById('cy-jours').innerHTML = WEEKDAYS.map(w=>
+    `<button type="button" class="day-btn${cyJoursSel.includes(w.v)?' on':''}" onclick="toggleCyJour(${w.v})" title="${w.n}">${w.l}</button>`
+  ).join('');
+}
+function toggleCyJour(v){
+  const i=cyJoursSel.indexOf(v);
+  if(i>-1) cyJoursSel.splice(i,1); else cyJoursSel.push(v);
+  cyJoursSel.sort((a,b)=>a-b);
+  renderCyJours();
+  updateCyclePreview();
+}
+
+   
 // ════════════════════════════════
 // CYCLES
 // ════════════════════════════════
@@ -2148,8 +2181,10 @@ function openAddCycle() {
   document.getElementById('cy-ctn').value='';
   document.getElementById('cy-error').textContent='';
   document.getElementById('cy-preview').style.display='none';
-  buildColorPicker(CYCLE_COLORS[0]);
+ buildColorPicker(CYCLE_COLORS[0]);
   document.getElementById('cy-color').value=CYCLE_COLORS[0];
+  cyJoursSel=[];
+  renderCyJours();
   openMo('mo-cycle');
   updateCyclePreview();
 }
@@ -2166,8 +2201,10 @@ function openEditCycle(cycleId) {
   document.getElementById('cy-obj').value=c.obj||'';
   document.getElementById('cy-ctn').value=c.ctn||'';
   document.getElementById('cy-error').textContent='';
-  buildColorPicker(c.color||CYCLE_COLORS[0]);
+ buildColorPicker(c.color||CYCLE_COLORS[0]);
   document.getElementById('cy-color').value=c.color||CYCLE_COLORS[0];
+  cyJoursSel=(c.jours||[]).slice();
+  renderCyJours();
   openMo('mo-cycle');
   updateCyclePreview();
 }
@@ -2176,10 +2213,13 @@ function updateCyclePreview() {
   const dur=parseInt(document.getElementById('cy-dur').value)||0;
   const freq=parseInt(document.getElementById('cy-freq').value)||0;
   const evf=parseInt(document.getElementById('cy-evf').value)||0;
+  const nbJ=cyJoursSel.length;
   if(dur>0&&freq>0){
-    const total=dur*freq, evals=evf>0?Math.floor(total/evf):0;
+    const total=(nbJ>0?nbJ:freq)*dur, evals=evf>0?Math.floor(total/evf):0;
     prev.style.display='block';
-    prev.textContent='→ '+total+' séances au total sur '+dur+' semaines'+(evals>0?' · '+evals+' évaluation(s) prévue(s)':'');
+    let txt='→ '+total+' séances au total sur '+dur+' semaines'+(evals>0?' · '+evals+' évaluation(s) prévue(s)':'');
+    if(nbJ>0&&nbJ!==freq) txt+=' ⚠️ '+nbJ+' jour(s) sélectionné(s) ≠ fréquence ('+freq+'/sem.)';
+    prev.textContent=txt;
   } else { prev.style.display='none'; }
 }
 function saveCycle() {
@@ -2196,13 +2236,15 @@ function saveCycle() {
   if(!debut||!isValidDate(debut)){errEl.textContent='Date invalide.'; return;}
   if(!dur||dur<1||dur>52){errEl.textContent='Durée entre 1 et 52 semaines.'; return;}
   if(!freq||freq<1||freq>7){errEl.textContent='Fréquence entre 1 et 7/semaine.'; return;}
+  if(cyJoursSel.length&&cyJoursSel.length!==freq){errEl.textContent='Le nombre de jours sélectionnés ('+cyJoursSel.length+') doit correspondre à la fréquence ('+freq+'/sem.), ou désélectionnez tous les jours pour une répartition automatique.'; return;}
+  const jours=cyJoursSel.length?cyJoursSel.slice():null;
   if(editingCycleId) {
     const c=p.cycles.find(x=>x.id===editingCycleId);
-    if(c) Object.assign(c,{nom,debut,dur,freq,evf,color,obj:document.getElementById('cy-obj').value.trim(),ctn:document.getElementById('cy-ctn').value.trim()});
+    if(c) Object.assign(c,{nom,debut,dur,freq,evf,color,jours,obj:document.getElementById('cy-obj').value.trim(),ctn:document.getElementById('cy-ctn').value.trim()});
     showToast('✓ Cycle modifié','ok');
   } else {
     if(!p.cycles) p.cycles=[];
-    p.cycles.push({id:uid(),nom,debut,dur,freq,evf,color,obj:document.getElementById('cy-obj').value.trim(),ctn:document.getElementById('cy-ctn').value.trim()});
+    p.cycles.push({id:uid(),nom,debut,dur,freq,evf,color,jours,obj:document.getElementById('cy-obj').value.trim(),ctn:document.getElementById('cy-ctn').value.trim()});
     showToast('✓ Cycle créé','ok');
   }
 const savedCycle = editingCycleId ? p.cycles.find(x=>x.id===editingCycleId) : p.cycles[p.cycles.length-1];
