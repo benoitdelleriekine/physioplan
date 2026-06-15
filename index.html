@@ -1728,7 +1728,8 @@ let confirmCallback = null;
 // ════════════════════════════════
 const uid      = () => crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16); });
 const clean    = s => (s || '').trim().replace(/\s+/g, ' ');
-const today    = () => new Date().toISOString().slice(0,10);
+function ymd(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+const today    = () => ymd(new Date());
 const getPt    = () => db.patients.find(p => p.id === cpid) || null;
 
 function fmtDate(s) {
@@ -1745,8 +1746,8 @@ function ageFrom(dob) {
   if (isNaN(d)) return null;
   return Math.floor((Date.now()-d)/(1000*60*60*24*365.25));
 }
-function addWks(s,w){ const d=new Date(s+'T00:00:00'); d.setDate(d.getDate()+w*7); return d.toISOString().slice(0,10); }
-function addDays(s,n){ const d=new Date(s+'T00:00:00'); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10); }
+function addWks(s,w){ const d=new Date(s+'T00:00:00'); d.setDate(d.getDate()+w*7); return ymd(d); }
+function addDays(s,n){ const d=new Date(s+'T00:00:00'); d.setDate(d.getDate()+n); return ymd(d); }
 function initials(n){ return n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2); }
 function isValidDate(s){ if(!s) return false; const d=new Date(s+'T00:00:00'); return !isNaN(d.getTime()); }
 
@@ -1840,7 +1841,7 @@ function genSeances(c) {
   const total=freq*dur, gap=7/freq, base=new Date(c.debut+'T00:00:00');
   for (let i=0; i<total; i++) {
     const d=new Date(base); d.setDate(base.getDate()+Math.round(i*gap));
-    list.push(d.toISOString().slice(0,10));
+    list.push(ymd(d));
   }
   return list;
 }
@@ -3035,7 +3036,7 @@ function renderCal() {
   } else {
     const d=new Date(calDate), dow=(d.getDay()+6)%7, wStart=new Date(d);
     wStart.setDate(d.getDate()-dow);
-    const days=[]; for(let i=0;i<7;i++){const x=new Date(wStart);x.setDate(wStart.getDate()+i);days.push(x.toISOString().slice(0,10));}
+    const days=[]; for(let i=0;i<7;i++){const x=new Date(wStart);x.setDate(wStart.getDate()+i);days.push(ymd(x));}
     const DOW=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
     title.textContent='Semaine du '+fmtShort(days[0])+' au '+fmtShort(days[6]);
     let html=`<div class="wk-grid"><div class="wk-hd"></div>${days.map((ds,i)=>`<div class="wk-hd${ds===todayS?' today-wh':''}">${DOW[i]}<br><span style="font-size:15px;font-weight:700">${parseInt(ds.slice(8))}</span></div>`).join('')}`;
