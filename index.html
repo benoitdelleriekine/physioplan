@@ -2414,7 +2414,8 @@ function renderBlocs() {
         <td><input value="${e.lib||''}" placeholder="Exercice…" oninput="updateBlocExo(${bi},${ei},'lib',this.value)" style="min-width:140px"></td>
         <td><input type="number" value="${e.series||''}" placeholder="3" min="1" oninput="updateBlocExo(${bi},${ei},'series',this.value)" style="width:100%"></td>
         <td><input value="${e.reps||''}" placeholder="10" oninput="updateBlocExo(${bi},${ei},'reps',this.value)" style="width:100%"></td>
-        <td><input value="${e.charge||''}" placeholder="40 kg" oninput="updateBlocExo(${bi},${ei},'charge',this.value)" style="width:100%"></td>
+       <td><input value="${e.charge||''}" placeholder="40 kg" oninput="updateBlocExo(${bi},${ei},'charge',this.value)" style="width:100%"></td>
+        <td><input value="${e.duree||''}" placeholder="10 min" oninput="updateBlocExo(${bi},${ei},'duree',this.value)" style="width:100%"></td>
         <td><input value="${e.tempo||''}" placeholder="2-0-2" oninput="updateBlocExo(${bi},${ei},'tempo',this.value)" style="width:100%"></td>
         <td><input value="${e.recup||''}" placeholder="60s" oninput="updateBlocExo(${bi},${ei},'recup',this.value)" style="width:100%"></td>
         <td><select class="exo-rpe-select ${rpeCls}" onchange="setBlocExoRPE(${bi},${ei},parseInt(this.value));updateRpeSelectStyle(this)">${rpeOpts(e.rpe)}</select></td>
@@ -2432,6 +2433,7 @@ function renderBlocs() {
             <th style="width:50px">Séries</th>
             <th style="width:50px">Rép.</th>
             <th style="width:68px">Charge</th>
+             <th style="width:60px">Durée</th>
             <th style="width:68px">Tempo</th>
             <th style="width:58px">Récup.</th>
             <th style="width:68px">RPE</th>
