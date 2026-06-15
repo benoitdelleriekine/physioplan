@@ -514,10 +514,12 @@ textarea{resize:vertical;min-height:76px;line-height:1.65}
 
 <!-- MAIN -->
 <main id="main">
-  <div id="empty">
-    <svg width="64" height="64" fill="none" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="1"/><path d="M24 32h16M32 24v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-    <h2>PhysioPlan</h2>
-    <p>Sélectionnez ou créez un patient pour commencer.</p>
+<div id="empty">
+    <div id="empty-content">
+      <svg width="64" height="64" fill="none" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="1"/><path d="M24 32h16M32 24v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <h2>PhysioPlan</h2>
+      <p>Sélectionnez ou créez un patient pour commencer.</p>
+    </div>
   </div>
 
   <div id="pv">
@@ -1859,6 +1861,7 @@ function renderSB(q='') {
         <div class="pt-sub">${age?age+' ans':''}${p.patho?(age?' · ':'')+p.patho:''}</div>
       </div>${dot}</div>`;
   }).join('');
+   updateEmptyState();
 }
 function filterPts(v) { renderSB(v); }
 
@@ -1927,6 +1930,24 @@ function openAddPatient() {
   document.getElementById('pt-error').textContent='';
   openMo('mo-pt');
   setTimeout(()=>document.getElementById('pt-prenom').focus(),50);
+}
+function updateEmptyState() {
+  const el = document.getElementById('empty-content');
+  if (!el) return;
+  if (!db.patients || !db.patients.length) {
+    el.innerHTML = `
+      <svg width="64" height="64" fill="none" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="1"/><path d="M24 32h16M32 24v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <h2 style="opacity:.85;font-size:26px;font-weight:600">Bienvenue sur PhysioPlan 👋</h2>
+      <p style="max-width:320px;text-align:center;opacity:.6">Vous n'avez pas encore de patient. Créez votre premier dossier pour démarrer le suivi (bilan, cycles, séances, évaluations).</p>
+      <button class="btn btn-p" onclick="openAddPatient()" style="margin-top:8px">+ Créer mon premier patient</button>
+    `;
+  } else {
+    el.innerHTML = `
+      <svg width="64" height="64" fill="none" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="1"/><path d="M24 32h16M32 24v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <h2>PhysioPlan</h2>
+      <p>Sélectionnez ou créez un patient pour commencer.</p>
+    `;
+  }
 }
 function openEditPt() {
   const p=getPt(); if(!p) return;
@@ -3542,6 +3563,7 @@ buildPS('b-ps','b-eva');
 
   saveDB();
   renderSB();
+  updateEmptyState();
 
   // Restaurer la sélection si un patient était ouvert
   if (cpid && db.patients.find(p => p.id === cpid)) {
