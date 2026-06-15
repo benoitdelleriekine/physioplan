@@ -403,6 +403,15 @@ textarea{resize:vertical;min-height:76px;line-height:1.65}
 .confirm-title{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:10px}
 .confirm-msg{font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:22px}
 .confirm-actions{display:flex;gap:10px;justify-content:flex-end}
+#tour-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:2500;display:none;align-items:center;justify-content:center;padding:20px}
+#tour-overlay.open{display:flex}
+.tour-modal{background:#fff;border-radius:var(--r-lg);max-width:440px;width:100%;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.25);text-align:center}
+.tour-title{font-family:'Fraunces',serif;font-size:21px;font-weight:600;margin-bottom:12px;color:var(--text)}
+.tour-body{font-size:13.5px;color:var(--muted);line-height:1.65;margin-bottom:22px}
+.tour-dots{display:flex;justify-content:center;gap:6px;margin-bottom:22px}
+.tour-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:var(--transition)}
+.tour-dot.on{background:var(--accent);width:18px;border-radius:4px}
+.tour-actions{display:flex;gap:8px;justify-content:space-between}
 
 /* ── TOAST ────────────────────────── */
 #toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;padding:12px 18px;border-radius:var(--r);font-size:13px;font-weight:500;z-index:3000;opacity:0;transition:opacity .25s;pointer-events:none;max-width:320px;box-shadow:var(--sh-lg)}
@@ -504,6 +513,10 @@ textarea{resize:vertical;min-height:76px;line-height:1.65}
     <button class="sb-btn-ghost" onclick="openSettings()">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
       Paramètres
+    </button>
+     <button class="sb-btn-ghost" onclick="startTour()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
+      Visite guidée
     </button>
     <button class="sb-btn-ghost" onclick="handleLogout()" style="color:rgba(255,255,255,.35);border-color:rgba(255,255,255,.05)">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -702,6 +715,18 @@ textarea{resize:vertical;min-height:76px;line-height:1.65}
 <div id="toast"></div>
 
 <!-- CONFIRM DIALOG -->
+   <div id="tour-overlay">
+  <div class="tour-modal">
+    <div id="tour-title" class="tour-title"></div>
+    <div id="tour-body" class="tour-body"></div>
+    <div id="tour-dots" class="tour-dots"></div>
+    <div class="tour-actions">
+      <button class="btn btn-s" id="tour-prev" onclick="tourNav(-1)">← Précédent</button>
+      <button class="btn btn-s" onclick="closeTour()">Passer</button>
+      <button class="btn btn-p" id="tour-next" onclick="tourNav(1)">Suivant</button>
+    </div>
+  </div>
+</div>
 <div id="confirm-overlay">
   <div class="confirm-box">
     <div class="confirm-title" id="confirm-title"></div>
@@ -1949,6 +1974,42 @@ function updateEmptyState() {
     `;
   }
 }
+const TOUR_STEPS = [
+  {title:'Bienvenue sur PhysioPlan 👋', body:"PhysioPlan vous aide à organiser le suivi de vos patients : bilans, cycles de rééducation, séances et évaluations, tout au même endroit. Faisons un rapide tour des fonctionnalités principales."},
+  {title:'1. Créer un patient', body:'Cliquez sur "+ Nouveau patient" dans le menu pour créer une fiche : nom, date de naissance, pathologie. Chaque patient dispose de son propre espace de suivi.'},
+  {title:'2. Le bilan initial', body:"L'onglet \"Bilan\" permet de noter le diagnostic, l'EVA douleur initiale, les objectifs et observations cliniques — la base de votre suivi."},
+  {title:'3. Cycles et séances', body:"Dans l'onglet \"Cycles\", créez un cycle de travail (ex : Renforcement) avec sa fréquence et sa durée. Chaque séance peut être détaillée avec des blocs d'exercices, un RPE et des notes."},
+  {title:'4. Calendrier & évaluations', body:'Le "Calendrier" affiche toutes les séances planifiées par mois ou semaine. L\'onglet "Évaluations" permet de suivre l\'évolution du patient (EVA, mobilité, force...).'},
+  {title:"C'est parti ! 🚀", body:'Vous êtes prêt à démarrer. Cliquez sur "+ Nouveau patient" pour créer votre premier dossier. Vous pourrez relancer cette visite guidée à tout moment via le bouton "Visite guidée" du menu.'}
+];
+let tourStep = 0;
+
+function startTour() {
+  tourStep = 0;
+  renderTourStep();
+  document.getElementById('tour-overlay').classList.add('open');
+}
+
+function renderTourStep() {
+  const s = TOUR_STEPS[tourStep];
+  document.getElementById('tour-title').textContent = s.title;
+  document.getElementById('tour-body').textContent = s.body;
+  document.getElementById('tour-dots').innerHTML = TOUR_STEPS.map((_,i)=>`<div class="tour-dot${i===tourStep?' on':''}"></div>`).join('');
+  document.getElementById('tour-prev').style.visibility = tourStep===0?'hidden':'visible';
+  document.getElementById('tour-next').textContent = tourStep===TOUR_STEPS.length-1 ? 'Terminer' : 'Suivant';
+}
+
+function tourNav(dir) {
+  if (dir>0 && tourStep===TOUR_STEPS.length-1) { closeTour(); return; }
+  tourStep = Math.max(0, Math.min(TOUR_STEPS.length-1, tourStep+dir));
+  renderTourStep();
+}
+
+function closeTour() {
+  document.getElementById('tour-overlay').classList.remove('open');
+  if (currentUser) localStorage.setItem('pp_tour_done_'+currentUser.id, '1');
+}
+   
 function openEditPt() {
   const p=getPt(); if(!p) return;
   editingPtMode=true;
@@ -3564,6 +3625,9 @@ buildPS('b-ps','b-eva');
   saveDB();
   renderSB();
   updateEmptyState();
+   if (!db.patients.length && currentUser && !localStorage.getItem('pp_tour_done_'+currentUser.id)) {
+    setTimeout(startTour, 600);
+  }
 
   // Restaurer la sélection si un patient était ouvert
   if (cpid && db.patients.find(p => p.id === cpid)) {
