@@ -48,6 +48,10 @@
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 1 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17"/></svg>
       Visite guidée
     </button>
+    <button class="sb-btn-ghost" onclick="openLibStandalone()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Bibliothèque d'exercices
+    </button>
     <button class="sb-btn-ghost" onclick="handleLogout()" style="color:rgba(255,255,255,.35);border-color:rgba(255,255,255,.05)">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Déconnexion
@@ -534,16 +538,7 @@
         </div>
       </div>
 
-      <div class="settings-section">
-        <h3>📚 Bibliothèque d'exercices</h3>
-        <div style="display:flex;gap:8px;margin-bottom:12px">
-          <input id="lib-new-s" placeholder="Ajouter un exercice…" style="flex:1" autocomplete="off">
-          <button class="btn btn-p btn-sm" onclick="addToLibSettings()">+ Ajouter</button>
-        </div>
-        <div id="lib-list-settings"></div>
-      </div>
-
-    </div>
+</div>
     <div class="mo-ft"><button class="btn btn-p" onclick="closeMo()">Fermer</button></div>
   </div>
 
@@ -2149,6 +2144,11 @@ function removeFromLib(name) {
   db.library = db.library.filter(x=>x!==name); saveDB(); renderLibSettings(); showToast('✓ Supprimé');
 }
 
+let _libStandalone = false;
+function openLibStandalone() {
+  _libStandalone = true;
+  openLib();
+}
 function openLib() {
   _libRegion = 'all';
   openMo('mo-lib');
@@ -2263,6 +2263,7 @@ function renderLib() {
 // Choisir depuis la bibliothèque EBP : propose FR ou EN
 let _pendingLibFr = null, _pendingLibEn = null;
 function pickFromLibEbp(fr, en) {
+  if(_libStandalone) return;
   // Si FR = EN, ajouter directement
   if(fr===en) { closeLibBackToSeance(); addExoRow(fr); return; }
   // Sinon proposer le choix
@@ -2294,8 +2295,8 @@ function renderLibSettings() {
     <button class="btn btn-d btn-xs" onclick="removeFromLib(this.dataset.name)" data-name="${x.replace(/"/g,'&quot;')}">🗑</button>
   </div>`).join('') || '<div style="font-size:13px;color:var(--muted);padding:8px 0">Aucun exercice personnalisé. Les exercices EBP sont dans la bibliothèque.</div>';
 }
-function closeLibBackToSeance() { openMo('mo-seance'); }
-function pickFromLib(name) { closeLibBackToSeance(); addExoRow(name); }
+function closeLibBackToSeance() { if(_libStandalone){ _libStandalone=false; closeMo(); } else { openMo('mo-seance'); } }
+function pickFromLib(name) { if(_libStandalone) return; closeLibBackToSeance(); addExoRow(name); }
 
 // ════════════════════════════════
 // CALENDAR
