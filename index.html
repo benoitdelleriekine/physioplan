@@ -198,6 +198,7 @@
         <div class="pg-title">
           <h2>Cycles de travail</h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-s btn-sm" onclick="openProtoList()">📚 Modèles</button>
             <button class="btn btn-s btn-sm" onclick="openCopyCycle()">📋 Copier un cycle</button>
             <button class="btn btn-p btn-sm" onclick="openAddCycle()">+ Nouveau cycle</button>
           </div>
@@ -293,6 +294,14 @@
     </div>
   </div>
 
+<!-- Protocoles -->
+  <div class="modal modal-lg" id="mo-proto" style="display:none">
+    <div class="mo-hd"><div><div class="mo-title">📋 Modèles de cycles</div><div class="mo-sub">Choisissez un protocole pré-rempli, basé sur la littérature scientifique — à ajuster selon le patient</div></div><button class="mo-close" onclick="closeMo()">✕</button></div>
+    <div class="mo-bd" id="proto-list"></div>
+    <div class="mo-ft"><button class="btn btn-s" onclick="closeMo()">Annuler</button></div>
+  </div>
+
+  
   <!-- Cycle -->
   <div class="modal modal-lg" id="mo-cycle" style="display:none">
     <div class="mo-hd"><div><div class="mo-title" id="mo-cy-title">Nouveau cycle</div></div><button class="mo-close" onclick="closeMo()">✕</button></div>
@@ -1443,6 +1452,38 @@ function toggleCyJour(v){
 // ════════════════════════════════
 // CYCLES
 // ════════════════════════════════
+
+function openProtoList() {
+  const cats = {};
+  PROTOCOLES.forEach(p => { (cats[p.cat] = cats[p.cat]||[]).push(p); });
+  let html = '';
+  Object.keys(cats).forEach(cat => {
+    html += `<div class="proto-cat">${cat}</div>`;
+    cats[cat].forEach(p => {
+      const idx = PROTOCOLES.indexOf(p);
+      html += `<div class="proto-row" onclick="applyProtocole(${idx})">
+        <div class="proto-row-title">${p.nom}</div>
+        <div class="proto-row-meta">${p.dur} semaines · ${p.freq}x/semaine${p.evf?' · éval. toutes les '+p.evf+' séances':''}</div>
+      </div>`;
+    });
+  });
+  document.getElementById('proto-list').innerHTML = html;
+  openMo('mo-proto');
+}
+
+function applyProtocole(idx) {
+  const proto = PROTOCOLES[idx];
+  if (!proto) return;
+  openAddCycle();
+  document.getElementById('cy-nom').value = proto.nom;
+  document.getElementById('cy-dur').value = proto.dur;
+  document.getElementById('cy-freq').value = proto.freq;
+  document.getElementById('cy-evf').value = proto.evf || '';
+  document.getElementById('cy-obj').value = proto.obj;
+  document.getElementById('cy-ctn').value = proto.ctn;
+  updateCyclePreview();
+}
+  
 function openAddCycle() {
   editingCycleId=null;
   document.getElementById('mo-cy-title').textContent='Nouveau cycle';
