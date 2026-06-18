@@ -1578,9 +1578,12 @@ function renderAIPreview(data) {
     <div class="fg" style="margin-top:12px"><label>Contenu</label><textarea id="ai-prev-ctn" style="width:100%;min-height:50px">${data.ctn||''}</textarea></div>
     <div style="margin-top:18px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--accent)">Aperçu des séances générées (${(data.seances||[]).length})</div>`;
 
-  (data.seances||[]).forEach((s, i) => {
-    const exoTxt = (s.blocs||[]).map(b => b.nom + ' : ' + (b.exos||[]).map(e=>e.nom+' ('+(e.series||'?')+'x'+(e.reps||'?')+(e.charge?', '+e.charge:'')+(e.duree?', '+e.duree:'')+')').join(', ')).join(' • ');
-    html += `<div class="ai-preview-seance"><b>Séance ${i+1}</b><br>${exoTxt || '<em style="color:var(--muted)">Aucun bloc</em>'}</div>`;
+ (data.seances||[]).forEach((s, i) => {
+    let blocsHtml = (s.blocs||[]).map(b => {
+      const exoLis = (b.exos||[]).map(e => `<li>${e.nom||e.lib||'?'} — ${e.series||'?'}×${e.reps||'?'}${e.charge?', '+e.charge:''}${e.duree?', '+e.duree:''}</li>`).join('');
+      return `<div style="margin-top:6px"><b>${b.nom||'Bloc'}</b><ul style="margin:4px 0 0 18px;padding:0">${exoLis}</ul></div>`;
+    }).join('');
+    html += `<div class="ai-preview-seance"><b>Séance ${i+1}</b>${blocsHtml || '<div style="color:var(--muted);margin-top:4px"><em>Aucun bloc</em></div>'}</div>`;
   });
 
   el.innerHTML = html;
@@ -1611,7 +1614,12 @@ async function confirmAICycle() {
   dates.forEach((d, i) => {
     const key = newCycle.id + '_' + i;
     const src = aiSeances[i];
-    p.seances[key] = { blocs: (src && src.blocs) || [], notes: '', rpe: '', date: d };
+    const blocs = ((src && src.blocs) || []).map(b => ({
+      nom: b.nom || 'Bloc',
+      couleur: b.couleur || 'green',
+      exos: (b.exos || []).map(e => ({ lib: e.nom || e.lib || '', series: e.series||'', reps: e.reps||'', charge: e.charge||'', duree: e.duree||'', tempo: e.tempo||'', recup: e.recup||'', rpe: e.rpe||'' }))
+    }));
+    p.seances[key] = { blocs: blocs, notes: '', rpe: '', date: d };
   });
 
   saveDB(); closeMo(); renderCycles(p); renderCal(); updateEvalBadge(p);
