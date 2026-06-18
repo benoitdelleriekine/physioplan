@@ -193,12 +193,37 @@
         <div class="brow"><button class="btn btn-p" onclick="saveBilan()">💾 Enregistrer le bilan</button></div>
       </div>
 
+
+<!-- Génération IA -->
+  <div class="modal modal-lg" id="mo-ai-cycle" style="display:none">
+    <div class="mo-hd"><div><div class="mo-title">✨ Générer un cycle avec l'IA</div><div class="mo-sub">Décrivez le contexte et les objectifs, l'IA propose un cycle complet à valider</div></div><button class="mo-close" onclick="closeMo()">✕</button></div>
+    <div class="mo-bd">
+      <div id="ai-step-input">
+        <div class="fg">
+          <label>Consigne</label>
+          <textarea class="ai-textarea" id="ai-consigne" placeholder="Ex : LCA opéré il y a 10 semaines, phase de renforcement, quadriceps déficitaire -20%, focus proprioception, élastiques et poids libres disponibles..."></textarea>
+        </div>
+        <div style="font-size:11.5px;color:var(--muted);margin-top:8px" id="ai-bilan-info"></div>
+      </div>
+      <div id="ai-step-loading" style="display:none">
+        <div class="ai-loading"><div class="ai-spinner-big"></div>Génération en cours, cela peut prendre quelques secondes…</div>
+      </div>
+      <div id="ai-step-preview" style="display:none"></div>
+    </div>
+    <div class="mo-ft" id="ai-footer">
+      <button class="btn btn-s" onclick="closeMo()">Annuler</button>
+      <button class="btn btn-p" id="ai-generate-btn" onclick="generateCycleAI()">✨ Générer</button>
+    </div>
+  </div>
+
+      
       <!-- CYCLES -->
       <div id="p-cycles" class="tab-p">
         <div class="pg-title">
           <h2>Cycles de travail</h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-s btn-sm" onclick="openProtoList()">📚 Modèles</button>
+           <button class="btn btn-s btn-sm" onclick="openProtoList()">📚 Modèles</button>
+            <button class="btn btn-s btn-sm" onclick="openAICycle()" style="background:linear-gradient(135deg,var(--accent),#4ADE80);color:#fff;border:none">✨ Générer IA</button>
             <button class="btn btn-s btn-sm" onclick="openCopyCycle()">📋 Copier un cycle</button>
             <button class="btn btn-p btn-sm" onclick="openAddCycle()">+ Nouveau cycle</button>
           </div>
